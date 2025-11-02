@@ -6,7 +6,8 @@ const service = {
     async getModels() {
         const uri = `/api/model/enabled`
         const response = await http.get(uri)
-        return response || {};
+        // Return array instead of object to match ModelSelect.vue expectations
+        return Array.isArray(response) ? response : [];
     },
 
     // 获取类型模型信息
