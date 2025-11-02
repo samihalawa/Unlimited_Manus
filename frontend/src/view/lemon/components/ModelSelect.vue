@@ -262,12 +262,15 @@ const onDropdownVisibleChange = (visible) => {
 
 // 初始化模型列表
 const initModel = async () => {
-  console.log('membership.value', membership.value) 
+  console.log('[MODELSELECT] initModel started')
+  console.log('[MODELSELECT] membership.value', membership.value)
   // Step 1: 读取本地缓存
   const cachedData = localStorage.getItem('modelList')
+  console.log('[MODELSELECT] cachedData:', cachedData)
   if (cachedData) {
     try {
       modelList.value = JSON.parse(cachedData)
+      console.log('[MODELSELECT] Loaded from cache, modelList.value.length:', modelList.value.length)
 
       // 如果 model_id 还没设置，默认设置为第一个模型的 ID
       if (modelList.value.length > 0 && !model_id.value) {
@@ -276,15 +279,20 @@ const initModel = async () => {
         selectedModelValue.value = defaultId
       }
     } catch (e) {
-      console.error('Failed to parse cached modelList', e)
+      console.error('[MODELSELECT] Failed to parse cached modelList', e)
     }
   }
 
   // Step 2: 获取接口数据（用于刷新）
   try {
+    console.log('[MODELSELECT] Calling modelService.getModels()...')
     const res = await modelService.getModels()
+    console.log('[MODELSELECT] modelService.getModels() response:', res)
+    console.log('[MODELSELECT] response type:', typeof res)
+    console.log('[MODELSELECT] is array:', Array.isArray(res))
 
     if (Array.isArray(res)) {
+      console.log('[MODELSELECT] Response is array, length:', res.length)
       modelList.value = res
       localStorage.setItem('modelList', JSON.stringify(res))
 
@@ -293,9 +301,11 @@ const initModel = async () => {
         model_id.value = defaultId
         selectedModelValue.value = defaultId
       }
+    } else {
+      console.warn('[MODELSELECT] Response is NOT an array! Type:', typeof res, 'Value:', res)
     }
   } catch (e) {
-    console.error('Failed to fetch models from API', e)
+    console.error('[MODELSELECT] Failed to fetch models from API', e)
   }
 }
 

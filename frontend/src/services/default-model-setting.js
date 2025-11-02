@@ -6,6 +6,9 @@ const service = {
     async getModels() {
         const uri = `/api/model/enabled`
         const response = await http.get(uri)
+        console.log('[DEBUG] getModels response:', response);
+        console.log('[DEBUG] response type:', typeof response);
+        console.log('[DEBUG] is array:', Array.isArray(response));
         // Return array instead of object to match ModelSelect.vue expectations
         return Array.isArray(response) ? response : [];
     },
