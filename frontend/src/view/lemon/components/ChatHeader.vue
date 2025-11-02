@@ -19,6 +19,8 @@
           <Collect @click="$emit('collect')" />
         </a-tooltip>
       </div> -->
+      <!-- Notification Center -->
+      <NotificationCenter />
       <div class="more-btn btn" @click="handleMore">
         <a-tooltip :title="$t('lemon.chatHeader.moreOptions')" placement="bottom" :arrow="false">
           <More />
@@ -63,6 +65,7 @@ import SearchFile from '@/assets/svg/searchFile.svg'
 import { useI18n } from 'vue-i18n'
 import More from '@/assets/svg/more.svg'
 import Edit from '@/assets/svg/edit.svg'
+import NotificationCenter from '@/components/NotificationCenter.vue'
 const { t } = useI18n()
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 
@@ -142,7 +145,7 @@ defineEmits(['share'])
 .chat-header {
   padding-top: .75rem;
   padding-bottom: .25rem;
-  background: #f8f8f7;
+  background: var(--bg-primary);
   display: flex;
   justify-content: space-between;
   align-items: center;

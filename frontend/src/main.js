@@ -1,6 +1,7 @@
 import { createApp } from 'vue';
 console.log('main.js started');
 import './style.scss';
+import './styles/theme.scss';
 console.log('style.scss imported');
 //ant
 import Antd from 'ant-design-vue';

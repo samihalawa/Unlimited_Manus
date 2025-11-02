@@ -243,6 +243,46 @@ function closeMenu() {
   showMenu.value = null
 }
 
+// Keyboard shortcuts handler
+const handleKeyboardShortcuts = (event) => {
+  // Forward slash (/) to focus search
+  if (event.key === '/' && !searchModalVisible.value) {
+    event.preventDefault()
+    onSearch()
+    return
+  }
+
+  // Escape to close search modal
+  if (event.key === 'Escape' && searchModalVisible.value) {
+    handleCancel()
+    return
+  }
+
+  // Arrow keys for navigation when search is open
+  if (searchModalVisible.value && filteredAgents.value.length > 0) {
+    const currentIndex = selectedAgent.value
+      ? filteredAgents.value.findIndex(a => a.id === selectedAgent.value.id)
+      : -1
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      const nextIndex = currentIndex < filteredAgents.value.length - 1 ? currentIndex + 1 : 0
+      selectedAgent.value = filteredAgents.value[nextIndex]
+    }
+
+    if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      const prevIndex = currentIndex > 0 ? currentIndex - 1 : filteredAgents.value.length - 1
+      selectedAgent.value = filteredAgents.value[prevIndex]
+    }
+
+    if (event.key === 'Enter' && selectedAgent.value) {
+      event.preventDefault()
+      selectAgent(selectedAgent.value, true)
+    }
+  }
+}
+
 onMounted(async () => {
   await fetchAgents()
   const agentId = route.params.agentId
@@ -250,11 +290,13 @@ onMounted(async () => {
     selectAgent(agents.value.find(item => item.id == agentId), false)
   }
   window.addEventListener('click', closeMenu)
+  window.addEventListener('keydown', handleKeyboardShortcuts)
 })
 
 
 onUnmounted(() => {
   window.removeEventListener('click', closeMenu)
+  window.removeEventListener('keydown', handleKeyboardShortcuts)
 })
 
 </script>

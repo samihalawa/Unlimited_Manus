@@ -40,6 +40,26 @@
 
         <!-- Footer Social Links -->
         <div class="footer-social">
+          <!-- Theme Toggle Button -->
+          <a-tooltip :title="isDark ? 'Light Mode' : 'Dark Mode'">
+            <div @click="toggleTheme" class="footer-social-link theme-toggle">
+              <svg v-if="!isDark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="footer-social-icon" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+              </svg>
+              <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="footer-social-icon" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+              </svg>
+            </div>
+          </a-tooltip>
+
           <a-tooltip title="Homepage">
             <a href="https://www.lemonai.ai" target="_blank" rel="noopener noreferrer" class="footer-social-link">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="footer-social-icon" xmlns="http://www.w3.org/2000/svg">
@@ -108,6 +128,7 @@ import Case from '@/assets/svg/case.svg'
 
 import { useChatStore } from '@/store/modules/chat'
 import { useUserStore } from '@/store/modules/user.js'
+import { useThemeStore } from '@/store/modules/theme'
 import emitter from '@/utils/emitter'
 import { useI18n } from 'vue-i18n'
 
@@ -116,8 +137,10 @@ import service from '@/services/default-model-setting'
 const router = useRouter()
 const chatStore = useChatStore()
 const userStore = useUserStore()
+const themeStore = useThemeStore()
 const { agent, mode } = storeToRefs(chatStore)
 const { user, membership } = storeToRefs(userStore)
+const { isDark } = storeToRefs(themeStore)
 
 
 const { t } = useI18n()
@@ -292,6 +315,11 @@ const handleVersionClick = () => {
   //https://lemon-11.gitbook.io/lemonai/version-update
   window.open('https://lemon-11.gitbook.io/lemonai/version-update', '_blank')
 }
+
+// Theme toggle handler
+const toggleTheme = () => {
+  themeStore.toggleTheme()
+}
 </script>
 
 <style scoped lang="less">
@@ -334,7 +362,7 @@ const handleVersionClick = () => {
 .menu-panel {
   width: 248px;
   height: 100%;
-  background-color: #f2f2f2;
+  background-color: var(--bg-sidebar);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -377,11 +405,11 @@ const handleVersionClick = () => {
     transition: background-color 0.2s;
 
     &:hover {
-      background-color: #eaeaea;
+      background-color: var(--bg-hover);
     }
 
     &:active {
-      background-color: #dcdcdc;
+      background-color: var(--bg-active);
     }
 
     .truncate {
@@ -479,7 +507,7 @@ const handleVersionClick = () => {
   display: flex;
   justify-content: space-between;
   gap: 4px;
-  border-top: 1px solid #e5e5e5;
+  border-top: 1px solid var(--border-primary);
   padding-top: 8px;
 }
 
@@ -496,8 +524,8 @@ const handleVersionClick = () => {
   cursor: pointer;
 
   &:hover {
-    background-color: #eaeaea;
-    color: #333;
+    background-color: var(--bg-hover);
+    color: var(--text-primary);
     transform: translateY(-1px);
   }
 

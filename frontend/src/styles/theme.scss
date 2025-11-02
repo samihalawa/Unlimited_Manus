@@ -1,0 +1,77 @@
+/**
+ * Global Theme Styles
+ * CSS Variables for Light and Dark themes
+ */
+
+/* Base CSS Variables - Light Theme (Default) */
+:root {
+  /* Background colors */
+  --bg-primary: #f8f8f7;
+  --bg-secondary: #ffffff;
+  --bg-sidebar: #f2f2f2;
+  --bg-hover: #eaeaea;
+  --bg-active: #dcdcdc;
+
+  /* Text colors */
+  --text-primary: #000000;
+  --text-secondary: #666666;
+  --text-tertiary: #999999;
+
+  /* Border colors */
+  --border-primary: #e5e5e5;
+  --border-secondary: #f0f0f0;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.2s ease;
+  --transition-slow: 0.3s ease;
+}
+
+/* Dark Theme Variables */
+:root[data-theme="dark"],
+.dark-theme {
+  /* Background colors - Matching Manus.im */
+  --bg-primary: rgb(22, 22, 24);
+  --bg-secondary: rgb(28, 28, 30);
+  --bg-sidebar: rgb(33, 33, 34);
+  --bg-hover: rgb(44, 44, 46);
+  --bg-active: rgb(58, 58, 60);
+
+  /* Text colors */
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0a0;
+  --text-tertiary: #666666;
+
+  /* Border colors */
+  --border-primary: #2a2a2c;
+  --border-secondary: #1a1a1c;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+/* Apply theme to common elements */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+/* Smooth theme transitions */
+* {
+  transition: background-color var(--transition-base),
+              color var(--transition-base),
+              border-color var(--transition-base);
+}
+
+/* Disable transitions during theme switch to avoid flash */
+.theme-transitioning * {
+  transition: none !important;
+}
