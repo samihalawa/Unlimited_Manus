@@ -1,11 +1,11 @@
 <template>
     <div class="logo-title">
-        <img class="logo" :src="LemonAI" alt="logo" />
+        <img class="logo" :src="appLogo" alt="Unlimited Manus logo" />
         <!-- <span class="beta-tag">Beta</span> -->
     </div>
 </template>
-<script setup> 
-import LemonAI from '@/assets/LemonAI.png'
+<script setup>
+import appLogo from '@/assets/LemonAI.png'
 </script>
 <style scoped> 
 .logo-title {

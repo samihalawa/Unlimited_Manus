@@ -1,7 +1,7 @@
 /**
  * Notification Composable
  * Provides easy-to-use notification methods
- * @author LemonAI Phase 1 Enhancement
+ * @author Unlimited Manus Phase 1 Enhancement
  */
 import { notification } from 'ant-design-vue'
 import { useNotificationStore } from '@/store/modules/notification'

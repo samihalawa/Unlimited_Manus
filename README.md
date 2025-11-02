@@ -1,5 +1,5 @@
 
-# Lemon AI​ is the first Full-stack Open-source Self-Evolving General AI Agent, offering a ​fully local alternative​ to Agentic platforms like Manus & Genspark AI. It features an integrated Code Interpreter VM sandbox for safe execution.​​
+# Unlimited Manus is the first Full-stack Open-source Self-Evolving General AI Agent, offering a ​fully local alternative​ to Agentic platforms like Claude & Minimax AI. It features an integrated Code Interpreter VM sandbox for safe execution.​​
 
 <div align=center>
   <img src="./public/img/Lemon_logo.png" width="400">
@@ -18,13 +18,13 @@
 </p>
 
 
-**Lemon AI​** is the first **​Full-stack Open-source Self-Evolving General AI Agent**, offering a **​fully local alternative​** to Agentic platforms like **Manus & Genspark AI. It features an integrated Code Interpreter VM sandbox for safe execution**.​​
+**Unlimited Manus** is the first **​Full-stack Open-source Self-Evolving General AI Agent**, offering a **​fully local alternative​** to Agentic platforms like **Claude & Minimax AI. It features an integrated Code Interpreter VM sandbox for safe execution**.​​
 
-**​Lemon AI empowers deep research, web browsing, viable coding, and data analysis – running entirely on your local hardware.​​** It supports ​**planning, action, reflection, and memory​** functionalities using **​local LLMs**​ (like DeepSeek,Kimi，Qwen, Llama, Gemma,GPTOSS) via **Ollama,VLLM**, ensuring **​complete privacy and zero cloud dependency.**
+**​Unlimited Manus empowers deep research, web browsing, viable coding, and data analysis – running entirely on your local hardware.​​** It supports ​**planning, action, reflection, and memory​** functionalities using **​local LLMs**​ (like DeepSeek,Kimi，Qwen, Llama, Gemma,GPTOSS) via **Ollama,VLLM**, ensuring **​complete privacy and zero cloud dependency.**
 
-For enhanced security, Lemon AI operates within a ​**local Virtual Machine (VM) sandbox by Docker.** This sandbox **​protects your machine's files and operating system​** by safely handling all code writing, execution, and editing tasks.
+For enhanced security, Unlimited Manus operates within a ​**local Virtual Machine (VM) sandbox by Docker.** This sandbox **​protects your machine's files and operating system​** by safely handling all code writing, execution, and editing tasks.
 
-Additionally, Lemon AI provides the **​flexibility to configure enhanced results**​ using APIs from leading cloud models like **​Claude, GPT, Gemini, and Grok.**
+Additionally, Unlimited Manus provides the **​flexibility to configure enhanced results**​ using APIs from leading cloud models like **​Claude, GPT, Gemini, and Grok.**
 
 <a href="https://youtu.be/OmU_4rrZUHE?si=iseqOl5TV2n2kovy">
   <figure>
@@ -76,9 +76,9 @@ Dramatically reduced operational costs:
 
 Significant cost savings without compromising on quality or performance, making advanced AI capabilities accessible to organizations of all sizes.
 
-### Lemon AI Editor
+### Unlimited Manus Editor
 
-**The world’s first General AI Agent Editor---Lemon AI Editor**
+**The world's first General AI Agent Editor---Unlimited Manus Editor**
 
 #### Why do we need a General AI Agent Editor? 
 
@@ -105,9 +105,9 @@ Lemon AI Editor lets you continuously edit, modify, and refine your generated HT
 </a>
 
 
-### Using Lemon AI
+### Using Unlimited Manus
 
-* Quickly get Lemon AI running in your environment with this starter guide. Use our [documentation](https://document.lemonai.cc/) for further references and more in-depth instructions.
+* Quickly get Unlimited Manus running in your environment with this starter guide. Use our [documentation](https://document.unlimitedmanus.cc/) for further references and more in-depth instructions.
 
 ### System Requirements[​](https://docs.all-hands.dev/modules/usage/installation#system-requirements) <a href="#system-requirements" id="system-requirements"></a>
 
@@ -115,7 +115,7 @@ Lemon AI Editor lets you continuously edit, modify, and refine your generated HT
 * Linux
 * Windows with [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) and [Docker Desktop support](https://docs.docker.com/desktop/setup/install/windows-install/#system-requirements)
 
-A system with a modern processor and a minimum of **4GB RAM** is recommended to run Lemon AI.
+A system with a modern processor and a minimum of **4GB RAM** is recommended to run Unlimited Manus.
 
 ### Prerequisites <a href="#prerequisites" id="prerequisites"></a>
 
@@ -155,7 +155,7 @@ The docker command below to start the app must be run inside the WSL terminal.
 
 ### Start the App <a href="#start-the-app" id="start-the-app"></a>
 
-The easiest way to run Lemon AI is in Docker.
+The easiest way to run Unlimited Manus is in Docker.
 
 ```bash
 docker pull hexdolemonai/lemon-runtime-sandbox:latest
@@ -177,7 +177,7 @@ docker run -it --rm --pull=always \
 
 ### Contributing
 
-For those who'd like to contribute code, see our [Contribution Guide](https://github.com/hexdocom/lemon/blob/main/CONTRIBUTING.md). At the same time, please consider supporting Lemon AI by sharing it on social media and at events and conferences.
+For those who'd like to contribute code, see our [Contribution Guide](https://github.com/samihalawa/Unlimited_Manus/blob/main/CONTRIBUTING.md). At the same time, please consider supporting Unlimited Manus by sharing it on social media and at events and conferences.
 
 #### contributors
 
@@ -187,13 +187,13 @@ For those who'd like to contribute code, see our [Contribution Guide](https://gi
 
 ### Community & contact
 
-We welcome your contribution to lemon AI to help improve lemon AI. Include: submit code, questions, new ideas, or share interesting and useful AI applications you have created based on lemon AI. We also welcome you to share lemon AI at different events, conferences and social media.
+We welcome your contribution to Unlimited Manus to help improve Unlimited Manus. Include: submit code, questions, new ideas, or share interesting and useful AI applications you have created based on Unlimited Manus. We also welcome you to share Unlimited Manus at different events, conferences and social media.
 
-* [GitHub Discussion](https://github.com/hexdocom/lemonai/discussions). Best for: sharing feedback and asking questions.
-* [GitHub Issues](https://github.com/hexdocom/Lemon/issues).Best for: bugs you encounter using Lemon.AI, and feature proposals. See our [Contribution Guide](https://github.com/hexdocom/lemon/blob/main/CONTRIBUTING.md).
-* [X(Twitter)](https://x.com/LemonAI_cc). Best for: sharing your applications and hanging out with the community.
+* [GitHub Discussion](https://github.com/samihalawa/Unlimited_Manus/discussions). Best for: sharing feedback and asking questions.
+* [GitHub Issues](https://github.com/samihalawa/Unlimited_Manus/issues).Best for: bugs you encounter using Unlimited Manus, and feature proposals. See our [Contribution Guide](https://github.com/samihalawa/Unlimited_Manus/blob/main/CONTRIBUTING.md).
+* [X(Twitter)](https://x.com/UnlimitedManus). Best for: sharing your applications and hanging out with the community.
 * [Discord](https://discord.com/invite/gjEXg4UBR4). Best for: sharing your applications and hanging out with the community.
-* commercial license（[feedback@lemonai.ai](mailto:feedback@lemonai.ai)）. Business consulting on commercial use licensing lemon AI.
+* commercial license（[feedback@unlimitedmanus.ai](mailto:feedback@unlimitedmanus.ai)）. Business consulting on commercial use licensing Unlimited Manus.
 
 ### Star History
 
@@ -201,8 +201,8 @@ We welcome your contribution to lemon AI to help improve lemon AI. Include: subm
 
 ### Security disclosure
 
-To protect your privacy, please avoid posting security issues on GitHub. Instead, send your questions to [feedback@lemonai.ai](mailto:feedback@lemonai.ai) and we will provide you with a more detailed answer.
+To protect your privacy, please avoid posting security issues on GitHub. Instead, send your questions to [feedback@unlimitedmanus.ai](mailto:feedback@unlimitedmanus.ai) and we will provide you with a more detailed answer.
 
 ### License
 
-This repository is available under the [Lemon AI Open Source License](https://github.com/hexdocom/lemon/blob/main/LICENSE), which is essentially Apache 2.0 with a few additional restrictions.
+This repository is available under the [Unlimited Manus Open Source License](https://github.com/samihalawa/Unlimited_Manus/blob/main/LICENSE), which is essentially Apache 2.0 with a few additional restrictions.
