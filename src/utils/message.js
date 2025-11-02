@@ -50,6 +50,9 @@ class Message {
   static async saveToDB(messageData, conversation_id) {
     try {
       const conversation = await Conversation.findOne({ where: { conversation_id } })
+      if (!conversation) {
+        throw new Error(`Conversation with id ${conversation_id} not found`);
+      }
       return await MessageTable.create({
         role: messageData.role,
         uuid: messageData.uuid,

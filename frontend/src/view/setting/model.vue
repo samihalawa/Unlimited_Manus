@@ -181,7 +181,7 @@ import "driver.js/dist/driver.css";
 import { useUserStore } from '@/store/modules/user.js'
 const { user,membership,points } = useUserStore();
 
-const platforms = ref({})
+const platforms = ref([])
 const choose_platform = ref({
   id: 'default',
   name: 'OpenAI',
@@ -428,6 +428,10 @@ const step1 = async () => {
 
 function init(id) {
   service.getPlatforms().then((res) => {
+    if (!Array.isArray(res)) {
+      console.error('getPlatforms did not return an array:', typeof res, res);
+      return;
+    }
     //判断是不是会员 membership
     let is_membership = false;
     //判断是不是在 membership.endDate: "2026-06-12T09:44:02.000Z" membership.startDate: "2025-06-12T09:44:02.000Z" 在这个时间范围内
@@ -449,6 +453,7 @@ function init(id) {
       ...platform,
       color: colors[index % colors.length]
     }))
+
     if (id) {
       choose_platform.value = platforms.value.find(p => p.id === id)
       handleGetModels(choose_platform.value.id)
@@ -457,6 +462,8 @@ function init(id) {
       handleGetModels(choose_platform.value.id)
     }
 
+  }).catch(err => {
+    console.error('Error in init getPlatforms:', err);
   })
 }
 

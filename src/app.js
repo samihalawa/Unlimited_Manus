@@ -60,6 +60,20 @@ app.use(koaSwagger({
   }
 }))
 
+// SPA fallback: serve index.html for all non-API routes that don't have matching files
+const fs = require('fs');
+app.use(async (ctx, next) => {
+  if (ctx.status === 404 && !ctx.url.startsWith('/api') && !ctx.url.startsWith('/swagger') && !ctx.url.startsWith('/coding-screenshots')) {
+    const indexPath = path.join(__dirname, '../public/index.html');
+    try {
+      ctx.type = 'text/html;charset=UTF-8';
+      ctx.body = fs.readFileSync(indexPath, 'utf8');
+    } catch (e) {
+      ctx.status = 404;
+      ctx.body = 'Not found';
+    }
+  }
+});
 
 // error-handling
 app.on('error', (err, ctx) => {

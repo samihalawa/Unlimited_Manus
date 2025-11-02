@@ -6,7 +6,9 @@ const service = {
   async getPlatforms() {
     const uri = `/api/platform`
     const response = await http.get(uri)
-    return response || {};
+    // The axios interceptor extracts res.data.data for responses with nested data
+    // So response should already be an array from the interceptor
+    return Array.isArray(response) ? response : (response?.data || []);
   },
 
   // 新增平台信息

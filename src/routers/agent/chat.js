@@ -16,20 +16,28 @@ const activeChatAbortControllers = new Map(); // conversation_id -> AbortControl
 router.post("/chat", async (ctx, next) => {
   const { request, response } = ctx;
   const body = request.body || {};
-  let { question, conversation_id, pid, model_id = 48 } = body;
-  await Conversation.update({ model_id }, { where: { conversation_id } })
+  let { question, conversation_id, pid, model_id = 35 } = body; // 35 = gemini-2.0-flash
 
-
+  // Ensure conversation exists
   if (!conversation_id) {
     conversation_id = uuid.v4();
+  }
+
+  // Find or create conversation
+  let conversation = await Conversation.findOne({ where: { conversation_id } });
+  if (!conversation) {
     const title = question.slice(0, 20);
-    const newConversation = await Conversation.create({
+    conversation = await Conversation.create({
       user_id: ctx.state.user.id,
       conversation_id: conversation_id,
       content: question,
       title: title,
-      status: 'done'
+      status: 'done',
+      model_id: model_id
     });
+  } else {
+    // Update model_id if provided
+    await Conversation.update({ model_id }, { where: { conversation_id } });
   }
 
   body.responseType = body.responseType || "sse";
