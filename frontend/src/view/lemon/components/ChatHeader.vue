@@ -165,7 +165,7 @@ defineEmits(['share'])
 .chat-title {
   font-size: 18px;
   font-weight: 500;
-  color: #34322d;
+  color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -212,10 +212,10 @@ defineEmits(['share'])
   position: absolute;
   right: -50px;
   top: 50px;
-  background: #fff;
+  background: var(--bg-secondary);
   border-radius: .75rem;
   cursor: pointer;
-  border: 1px solid #0000001f;
+  border: 1px solid var(--border-primary);
   min-width: max-content;
 
   .edit-name {
