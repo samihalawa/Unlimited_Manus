@@ -204,6 +204,12 @@ onMounted(() => {
       width: fit-content;
       max-width: 100%;
     }
+
+    &:hover .message-actions {
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      transform: translateY(0) !important;
+    }
   }
 
   &:hover {

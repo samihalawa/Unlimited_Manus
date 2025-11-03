@@ -180,10 +180,8 @@ function activateMessageAt(index) {
       }
     }
 
-    &:hover {
-      .message-options {
-        display: flex;
-      }
+    &:hover .message-options {
+      display: flex !important;
     }
   }
 
