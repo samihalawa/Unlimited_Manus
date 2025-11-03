@@ -1,0 +1,1 @@
+import{n as e}from"./index-COUhflQL.js";const i=e("user",{state:()=>({user:{},membership:{},points:{}}),actions:{setUser(s){console.log("setUser",s),this.user=s},setMembership(s){console.log("setMembership",s),this.membership=s},setPoints(s){this.points=s},clear(){this.user={},this.membership={},this.points={}}},persist:!0});export{i as u};

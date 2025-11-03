@@ -2,6 +2,7 @@
  * Theme Provider Utilities
  * Manages theme tokens for Ant Design and CSS variables
  */
+import { theme as antdTheme } from 'ant-design-vue'
 
 /**
  * Light theme configuration
@@ -110,6 +111,6 @@ export function getAntdTheme(theme) {
   const config = getThemeConfig(theme)
   return {
     token: config.token,
-    algorithm: theme === 'dark' ? 'dark' : 'default'
+    algorithm: theme === 'dark' ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm
   }
 }
