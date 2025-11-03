@@ -19,12 +19,20 @@
             </div>
             <div v-else></div>
 
-            <div style="display: flex; align-items: center; justify-content: flex-end">
-              <div class="message-time display-none">
+            <div class="message-actions" v-if="message.role === 'user'">
+              <div class="message-time" v-if="message.timestamp">
                 {{ formatTimeWithHMS(message.timestamp, t) }}
               </div>
-              <div class="copy-button display-none" @click="copyMessage(message)" v-if="message.role === 'user'">
-                <CopyOutlined />
+              <div class="action-buttons">
+                <div class="action-btn" @click="copyMessage(message)" title="Copy">
+                  <CopyOutlined />
+                </div>
+                <div class="action-btn" @click="editMessage(message)" title="Edit">
+                  <EditOutlined />
+                </div>
+                <div class="action-btn delete-btn" @click="deleteMessage(message)" title="Delete">
+                  <DeleteOutlined />
+                </div>
               </div>
             </div>
           </div>
@@ -53,8 +61,8 @@
 <script setup>
 import Message from "../message/index.vue";
 import ChatTree from "./ChatTree.vue";
-import { CopyOutlined, ArrowUpOutlined, ArrowDownOutlined } from "@ant-design/icons-vue";
-import { message as messageUtil } from "ant-design-vue";
+import { CopyOutlined, EditOutlined, DeleteOutlined, ArrowUpOutlined, ArrowDownOutlined } from "@ant-design/icons-vue";
+import { message as messageUtil, Modal } from "ant-design-vue";
 import { useChatStore } from "@/store/modules/chat";
 import { useI18n } from "vue-i18n";
 import { onMounted, computed, ref } from "vue";
@@ -103,6 +111,24 @@ const copyMessage = (message) => {
       console.error("Failed to copy:", err);
       messageUtil.error(t("lemon.message.copyError"));
     });
+};
+
+const editMessage = (message) => {
+  messageUtil.info("Edit message feature coming soon");
+};
+
+const deleteMessage = (message) => {
+  Modal.confirm({
+    title: "Delete Message",
+    content: "Are you sure you want to delete this message?",
+    okText: "Delete",
+    cancelText: "Cancel",
+    okButtonProps: { danger: true },
+    onOk() {
+      chatStore.deleteMessage(message.id);
+      messageUtil.success("Message deleted");
+    },
+  });
 };
 
 onMounted(() => {
@@ -181,10 +207,10 @@ onMounted(() => {
   }
 
   &:hover {
-    .message-options {
-      .display-none {
-        display: flex;
-      }
+    .message-actions {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
     }
   }
 }
@@ -199,29 +225,55 @@ onMounted(() => {
   padding: 0px 12px;
   justify-content: space-between;
   height: 24px;
+}
 
-  .display-none {
-    display: none;
+.message-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.message-time {
+  font-size: 12px;
+  color: var(--text-tertiary, #999);
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background-color: var(--bg-secondary, #ffffff);
+  border: 1px solid var(--border-primary, rgba(17, 24, 39, 0.08));
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+.action-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  color: var(--text-secondary, #666);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    background-color: var(--bg-hover, #eaeaea);
+    color: var(--text-primary, #000);
+    transform: translateY(-1px);
   }
+}
 
-  .copy-button {
-    right: 8px;
-    bottom: 8px;
-    width: 24px;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: #999;
-    transition: color 0.2s;
-
-    &:hover {
-      color: #666;
-    }
-
-    .icon-copy {
-      font-size: 16px;
-    }
-  }
+.delete-btn:hover {
+  background-color: rgba(239, 68, 68, 0.14);
+  color: #b91c1c;
 }
 
 .token-consumption {

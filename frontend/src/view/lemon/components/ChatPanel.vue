@@ -1,25 +1,31 @@
 <template>
-  <div class="chat-panel">
-    <AgentWelcome class="welcome" v-if="agentId && !conversationId" />
-    <template v-else-if="conversationId">
-      <div class="chat-panel-content">
-        <ChatHeader :title="currentChat?.title" @share="handleShare" />
-        <ChatMessages :messages="messages" :mode="mode" />
-        <ChatInput @send="handleSendMessage" />
-        <div class="scroll-to-bottom" @click="scrollToBottom" v-if="isShowScrollToBottom">
-          <Down />
+  <div class="chat-layout">
+    <ConversationList />
+
+    <div class="chat-panel">
+      <AgentWelcome class="welcome" v-if="agentId && !conversationId" />
+      <template v-else-if="conversationId">
+        <div class="chat-panel-content">
+          <ChatHeader :title="currentChat?.title" @share="handleShare" />
+          <ChatMessages :messages="messages" :mode="mode" />
+          <ChatInput @send="handleSendMessage" />
+          <div class="scroll-to-bottom" @click="scrollToBottom" v-if="isShowScrollToBottom">
+            <Down />
+          </div>
         </div>
-      </div>
-    </template>
-    <Welcome class="welcome" v-else />
-    <fileClass />
+      </template>
+      <Welcome class="welcome" v-else />
+      <fileClass />
+    </div>
+
+    <Preview class="preview" />
+    <LocalPreview class="preview" />
   </div>
-  <Preview class="preview" />
-  <LocalPreview class="preview" />
 </template>
 
 <script setup>
 import { ref, computed, watchEffect, onMounted } from "vue";
+import ConversationList from "./ConversationList.vue";
 import ChatHeader from "./ChatHeader.vue";
 import ChatMessages from "./ChatMessages.vue";
 import Preview from "@/components/preview/index.vue";
@@ -216,13 +222,23 @@ const handleRejectConfirm = () => {
     0px 0px 1.25px 0px #00000014;
 }
 
+.chat-layout {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  background: var(--bg-secondary, #ffffff);
+}
+
 .chat-panel {
-  min-width: 50%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   padding-left: 1.25rem;
   padding-right: 1.25rem;
   max-width: 100%;
   width: 100%;
   overflow: hidden;
+  min-width: 0;
 }
 
 .chat-panel:has(.welcome) {
@@ -235,6 +251,14 @@ const handleRejectConfirm = () => {
 }
 
 @media (max-width: 768px) {
+  .chat-layout {
+    flex-direction: column;
+  }
+
+  :deep(.conversation-list) {
+    display: none;
+  }
+
   .preview {
     position: absolute !important;
     left: 0;

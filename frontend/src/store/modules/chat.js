@@ -87,6 +87,15 @@ export const useChatStore = defineStore('chat', {
       this.status == "done";
       this.chatInfo.pid = -1;
     },
+    deleteMessage(messageId) {
+      if (!messageId) {
+        return;
+      }
+      const index = this.messages.findIndex((message) => message.id === messageId);
+      if (index !== -1) {
+        this.messages.splice(index, 1);
+      }
+    },
     clearAgent() {
       this.agent = {};
       this.list = [];
