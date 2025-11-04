@@ -78,6 +78,11 @@ async function sendMessage(question, conversationId, files, mcp_server_ids = [],
     // if (mode.value === 'chat') {
     //     uri = `${baseURL}/api/agent/chat`;
     // }
+    // Map task mode to agent mode (backend doesn't recognize "task")
+    const validatedMode = (workMode === 'task' || !['auto', 'agent', 'chat', 'twins'].includes(workMode)) 
+        ? 'agent' 
+        : workMode;
+    
     let options = {
         question: question,
         conversation_id: conversationId,
@@ -85,7 +90,7 @@ async function sendMessage(question, conversationId, files, mcp_server_ids = [],
         mcp_server_ids,
         agent_id: agent.value.id,
         model_id: model_id.value,
-        mode: workMode
+        mode: validatedMode
     };
 
     // Log mode and chatInfo values

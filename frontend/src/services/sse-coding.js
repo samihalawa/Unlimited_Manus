@@ -81,6 +81,12 @@ const sendMessage = async (question, conversationId, files, mcp_server_ids = [],
   chatStore.handleInitMessage(question, files, screenshot, filepath);
 
   let uri = `/api/agent/coding/sse`;
+  
+  // Map task mode to agent mode (backend doesn't recognize "task")
+  const validatedMode = (workMode === 'task' || !['auto', 'agent', 'chat', 'twins'].includes(workMode)) 
+      ? 'agent' 
+      : workMode;
+  
   let options = {
     requirement: question,
     selection: selection,
@@ -91,7 +97,7 @@ const sendMessage = async (question, conversationId, files, mcp_server_ids = [],
     fileIds,
     mcp_server_ids,
     model_id: model_id.value,
-    mode: workMode
+    mode: validatedMode
   };
   console.log("options", options)
   console.log("mode.value", mode.value)
