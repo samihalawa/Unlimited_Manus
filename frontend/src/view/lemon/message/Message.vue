@@ -64,7 +64,7 @@ const props = defineProps({
 });
 
 const showFiles = computed(() => {
-  const actions = new Set(["finish_summery", "question", "progress", "chat"]);
+  const actions = new Set(["finish_summery", "question", "progress", "chat", "message"]);
   return actions.has(props.message?.meta?.action_type);
 });
 

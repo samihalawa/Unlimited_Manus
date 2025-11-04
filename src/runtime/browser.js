@@ -1,24 +1,38 @@
-const axios = require('axios')
+const { buildBrowserPrompt } = require('@src/utils/browserPrompt');
+const { runComputerUseAutomation } = require('@src/utils/stagehand');
 
 async function browser(action, uuid) {
-  const host = 'localhost'
-  const host_port = 9000
+  const { params = {} } = action;
+  if (!params.question && params.url && params.intent) {
+    params.question = buildBrowserPrompt({
+      url: params.url,
+      intent: params.intent,
+      focus: params.focus,
+    });
+  }
+  if (!params.question) {
+    throw new Error('Browser prompt is missing. Ensure url and intent are provided.');
+  }
+  const result = await runComputerUseAutomation({
+    url: params.url,
+    instruction: params.question,
+    maxSteps: params.max_steps,
+  });
 
-  const request = {
-    method: 'POST',
-    url: `http://${host}:${host_port}/api/browser/task`,
-    data: { prompt: action.params.question, llm_config: action.params.llm_config },
-  };
-  const response = await axios(request);
-  //extracted_content
-  const result_content = response.data.data.history.task;
   return {
     uuid,
-    status: 'success',
-    content: result_content,
+    status: result?.success === false ? 'failure' : 'success',
+    content: result?.message || 'Browser automation completed.',
     meta: {
       action_type: 'browser',
-      json: { browser_history: response.data.data.history.browser_history, browser_history_screenshot: response.data.data.history.browser_history_screenshot }
+      json: [{
+        url: params.url,
+        success: result?.success ?? false,
+        completed: result?.completed ?? false,
+        actions: Array.isArray(result?.actions) ? result.actions.slice(-5) : [],
+        usage: result?.usage ?? null,
+      }],
+      content: JSON.stringify(result ?? {}),
     }
   };
 }

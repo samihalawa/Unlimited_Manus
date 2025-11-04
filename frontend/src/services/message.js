@@ -25,6 +25,8 @@ function handleMessage(message, messages) {
     switch (action_type) {
         case "chat":
             return handleChatMessage(message, messages);
+        case "message":
+            return handleChatMessage(message, messages);
         case "auto_reply":
             messageStatus = "running"
             return handleAutoReply(message, messages);

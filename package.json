@@ -15,6 +15,7 @@
     "electron-start": "electron-forge start"
   },
   "dependencies": {
+    "@browserbasehq/stagehand": "^3.0.1",
     "@dqbd/tiktoken": "^1.0.21",
     "@modelcontextprotocol/sdk": "^1.13.0",
     "@playwright/test": "^1.52.0",
@@ -51,7 +52,8 @@
     "swagger-jsdoc": "^6.2.8",
     "uuid": "^11.1.0",
     "which": "^5.0.0",
-    "winston": "^3.17.0"
+    "winston": "^3.17.0",
+    "zod": "3.25.67"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.8.1",

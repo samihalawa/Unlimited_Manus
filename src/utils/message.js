@@ -8,7 +8,7 @@ class Message {
    * @param {('success'|'failure'|'running')} params.status 成功或失败
    * @param {string} [params.content] 文本内容
    * @param {string} [params.task_id]
-   * @param {('plan'|'task'|'auto_reply'|'finish'|'search'|'file'|'terminal'|'todo'|'browser'|'question'|'finish_summery'|'progress')} [params.action_type]
+   * @param {('plan'|'task'|'auto_reply'|'finish'|'search'|'file'|'terminal'|'todo'|'browser'|'question'|'finish_summery'|'progress'|'shell'|'match'|'schedule'|'expose'|'generate'|'slides'|'webdev_init_project'|'message')} [params.action_type]
    * @param {string} [params.filepath]
    * @param {string} [params.url]
    * @param {Array} [params.json]

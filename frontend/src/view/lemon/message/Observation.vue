@@ -45,6 +45,15 @@ const actionTypeDescriptions = {
   browser: t("lemon.message.browsing"),
   web_search: t("lemon.message.searching"),
   read_file: t("lemon.message.readFile"),
+  file: t("lemon.message.editFile"),
+  shell: t("lemon.message.runCommand"),
+  search: t("lemon.message.searching"),
+  match: "Pattern match",
+  schedule: "Schedule task",
+  expose: "Expose port",
+  generate: "Generation mode",
+  slides: "Slides mode",
+  webdev_init_project: "Init project",
   mcp_tool: "MCP",
 };
 const svgHash = {
@@ -55,6 +64,15 @@ const svgHash = {
   read_file: Edit,
   web_search: Browse,
   browser: Browse,
+  file: Edit,
+  shell: Bash,
+  search: Browse,
+  match: Tools,
+  schedule: Tools,
+  expose: Tools,
+  generate: Tools,
+  slides: Tools,
+  webdev_init_project: Tools,
   mcp_tool: Bash,
 };
 

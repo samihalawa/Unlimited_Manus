@@ -76,6 +76,23 @@ Dramatically reduced operational costs:
 
 Significant cost savings without compromising on quality or performance, making advanced AI capabilities accessible to organizations of all sizes.
 
+### Gemini Computer Use Browser Automation
+
+Unlimited Manus now drives all computer-use style browsing through [Stagehand](https://github.com/browserbase/stagehand) with the Gemini Computer Use preview model. To enable the integration, export the following environment variables (the values below are examples provided for local testing):
+
+```bash
+export BROWSERBASE_API_KEY="bb_live_g3i-b4WPFh__E3cErKE5rO-jWds"
+export BROWSERBASE_PROJECT_ID="d718e85f-be7b-497d-9123-b1bbf798f1bb"
+export GEMINI_API_KEY="AIzaSyC1TRkC_N7XgCuu8jY-0TIIcFHmW5qA5JA"
+# optional tuning
+export BROWSER_AUTOMATION_MAX_STEPS=25
+export GEMINI_COMPUTER_USE_MODEL="google/gemini-2.5-computer-use-preview-10-2025"
+```
+
+The agent automatically launches Stagehand in Browserbase mode with a 1288×711 viewport, routes instructions through Gemini computer-use, and captures the final summary alongside a trimmed action trace for the UI. You can adjust the viewport via `BROWSER_AUTOMATION_VIEWPORT_WIDTH` / `BROWSER_AUTOMATION_VIEWPORT_HEIGHT` if a different resolution is required.
+
+Once the environment variables are configured, all `browser` tool invocations run through Gemini CUA without any extra wiring inside task prompts.
+
 ### Unlimited Manus Editor
 
 **The world's first General AI Agent Editor---Unlimited Manus Editor**

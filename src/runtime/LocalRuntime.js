@@ -99,11 +99,16 @@ class LocalRuntime {
       default:
         if (tool) {
           console.log('LocalRuntime.execute_action.tool', tool.name, params);
-          const execute = tool.execute;
-          const execute_result = await execute(params);
-          // console.log('LocalRuntime.execute_action.tool.execute', execute_result);
-          const { content, meta = {} } = execute_result;
-          result = { uuid, status: 'success', content, memorized: tool.memorized || false, meta };
+          try {
+            const execute = tool.execute;
+            params.conversation_id = context.conversation_id;
+            const execute_result = await execute(params, uuid, context);
+            const { content, meta = {} } = execute_result || {};
+            result = { uuid, status: 'success', content: content || '', memorized: tool.memorized || false, meta };
+          } catch (error) {
+            console.error(`Error executing tool ${tool.name}:`, error);
+            result = { uuid, status: 'failure', error: error.message, content: error.message || '', stderr: '' };
+          }
         } else {
           result = { status: 'failure', error: `Unknown action type: ${type}`, content: '', stderr: '' };
         }

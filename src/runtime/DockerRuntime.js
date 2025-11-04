@@ -5,7 +5,6 @@ const os = require('os');
 const DOCKER_HOST_ADDR = process.env.DOCKER_HOST_ADDR;
 const ECI_SERVER_HOST = process.env.ECI_SERVER_HOST
 const { write_code: util_write_code } = require('./utils/tools');
-const { getDefaultModel } = require('@src/utils/default_model')
 // const { createConf } = require('@src/utils/nginx')
 
 
@@ -189,18 +188,6 @@ class DockerRuntime {
           action.params.path = path.join(dir_name, action.params.path)
         }
         result = await this.read_file(action, uuid);
-        break;
-      case 'browser':
-        let model_info = await getDefaultModel(context.conversation_id)
-        const llm_config = {
-          model_name: model_info.model_name,
-          api_url: model_info.base_url,
-          api_key: model_info.api_key
-        }
-        // llm_config.api_url='http://host.docker.internal:3002/api/agent/v1'
-        action.params.llm_config = llm_config
-        action.params.conversation_id = context.conversation_id
-        result = await this._call_docker_action(action, uuid)
         break;
       default:
         if (tool) {
