@@ -1,6 +1,5 @@
 <template>
   <div class="lemon-container" :class="{ 'mobile-menu-open': isMobileMenuOpen }">
-    <SidebarMain />
     <div class="lemon-content">
       <div v-if="isMobileMenuOpen" class="mobile-overlay" @click="closeMobileMenu"></div>
       <router-view />
@@ -10,7 +9,6 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue'
-import SidebarMain from '@/view/menu/index.vue'
 import emitter from '@/utils/emitter'
 
 import { useRoute } from 'vue-router';
