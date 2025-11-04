@@ -13,27 +13,41 @@ const WebdevInitProject = {
   params: {
     type: "object",
     properties: {
-      preset: {
-        description: "Project preset: 'web-static' or 'web-db-user'",
+      brief: {
+        description: "A one-sentence description of the project initialization purpose",
+        type: "string"
+      },
+      description: {
+        description: "Description of the web project to be created (will be used as project description)",
+        type: "string"
+      },
+      features: {
+        description: "Initial capability preset for the project.",
         type: "string",
         enum: ["web-static", "web-db-user"]
       },
       project_name: {
-        description: "Project name (used for directory)",
+        description: "Name of the web project to be created (will be used as directory name)",
+        type: "string"
+      },
+      project_title: {
+        description: "Title of the web project to be created (will be used as project title)",
         type: "string"
       }
     },
-    required: ["preset", "project_name"]
+    required: ["features", "project_name"]
   },
   memorized: false,
   
   async getActionDescription(args) {
-    const { preset, project_name } = args;
-    return `Initializing ${preset} project: ${project_name}`;
+    const { features, project_name, brief } = args;
+    if (brief) return brief;
+    return `Initializing ${features} project: ${project_name}`;
   },
   
   async execute(args, uuid, context) {
-    const { preset, project_name } = args;
+    const { features, project_name, project_title, description } = args;
+    const preset = features; // Use features as preset for internal logic
     
     try {
       // Determine project directory

@@ -10,6 +10,10 @@ const Schedule = {
   params: {
     type: "object",
     properties: {
+      brief: {
+        description: "A one-sentence preamble describing the purpose of this operation",
+        type: "string"
+      },
       type: {
         description: "Schedule type: 'cron' for cron expression or 'interval' for periodic execution",
         type: "string",
@@ -45,7 +49,8 @@ const Schedule = {
   memorized: false,
   
   async getActionDescription(args) {
-    const { type, name } = args;
+    const { type, name, brief } = args;
+    if (brief) return brief;
     return `Scheduling ${type} task: ${name}`;
   },
   

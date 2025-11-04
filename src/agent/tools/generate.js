@@ -9,12 +9,8 @@ const Generate = {
   params: {
     type: "object",
     properties: {
-      mode_type: {
-        description: "Type of generation mode (e.g., 'content', 'code', 'data')",
-        type: "string"
-      },
-      description: {
-        description: "Description of what will be generated",
+      brief: {
+        description: "A one-sentence preamble describing the purpose of this operation",
         type: "string"
       }
     },
@@ -23,25 +19,24 @@ const Generate = {
   memorized: false,
   
   async getActionDescription(args) {
-    const { mode_type } = args;
-    return `Entering generation mode${mode_type ? ': ' + mode_type : ''}`;
+    const { brief } = args;
+    if (brief) return brief;
+    return `Entering generation mode`;
   },
   
   async execute(args, uuid, context) {
-    const { mode_type = 'default', description = '' } = args;
+    const { brief } = args;
     
     try {
       // Set generation mode in context
       context.generation_mode = {
         active: true,
-        type: mode_type,
-        description,
         activated_at: new Date().toISOString()
       };
       
       return {
         status: 'success',
-        content: `Generation mode activated${mode_type ? ': ' + mode_type : ''}${description ? '\n' + description : ''}`,
+        content: `Generation mode activated`,
         meta: {
           action_type: 'generate',
           mode: context.generation_mode,

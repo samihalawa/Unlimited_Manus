@@ -13,17 +13,17 @@ const Slides = {
   params: {
     type: "object",
     properties: {
-      slide_count: {
-        description: "Number of slides in the presentation",
-        type: "integer"
+      brief: {
+        description: "A one-sentence preamble describing the purpose of this operation",
+        type: "string"
       },
       slide_content_file_path: {
-        description: "Path to markdown file containing slide content (separated by '---' or '___')",
+        description: "Path to markdown file in sandbox containing the detailed slide content outline",
         type: "string"
       },
-      title: {
-        description: "Presentation title (optional)",
-        type: "string"
+      slide_count: {
+        description: "Total number of slides in the presentation",
+        type: "number"
       }
     },
     required: ["slide_count", "slide_content_file_path"]
@@ -31,12 +31,14 @@ const Slides = {
   memorized: false,
   
   async getActionDescription(args) {
-    const { slide_count, title } = args;
-    return `Creating ${slide_count}-slide presentation${title ? ': ' + title : ''}`;
+    const { slide_count, brief } = args;
+    if (brief) return brief;
+    return `Creating ${slide_count}-slide presentation`;
   },
   
   async execute(args, uuid, context) {
-    const { slide_count, slide_content_file_path, title = 'Presentation' } = args;
+    const { slide_count, slide_content_file_path } = args;
+    const title = 'Presentation';
     
     try {
       // Resolve content file path

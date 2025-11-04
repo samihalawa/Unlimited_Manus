@@ -8,13 +8,18 @@ const axios = require('axios');
 const fs = require('fs').promises;
 const path = require('path');
 const { existsSync } = require('fs');
-const UserSearchSetting = require('@src/models/UserSearchSetting');
-const SearchProvider = require('@src/models/SearchProvider');
 
-// Import existing search implementations
-const TalivySearch = require('@src/tools/impl/web_search/TalivySearch');
-const CloudswaySearch = require('@src/tools/impl/web_search/CloudswaySearch');
-const LocalSearch = require('@src/tools/impl/web_search/LocalSearch');
+// Import models and search implementations (with error handling)
+let UserSearchSetting, SearchProvider, TalivySearch, CloudswaySearch, LocalSearch;
+try {
+  UserSearchSetting = require('@src/models/UserSearchSetting');
+  SearchProvider = require('@src/models/SearchProvider');
+  TalivySearch = require('@src/tools/impl/web_search/TalivySearch');
+  CloudswaySearch = require('@src/tools/impl/web_search/CloudswaySearch');
+  LocalSearch = require('@src/tools/impl/web_search/LocalSearch');
+} catch (err) {
+  console.warn('Search tool: Could not load search dependencies:', err.message);
+}
 
 const Search = {
   name: "search",
@@ -74,12 +79,14 @@ const Search = {
     try {
       // Get user search settings
       let userSearchSetting;
-      try {
-        userSearchSetting = await UserSearchSetting.findOne({ 
-          where: { user_id: context.user_id }
-        });
-      } catch (err) {
-        console.warn('Could not load user search settings, using defaults');
+      if (UserSearchSetting) {
+        try {
+          userSearchSetting = await UserSearchSetting.findOne({ 
+            where: { user_id: context.user_id }
+          });
+        } catch (err) {
+          console.warn('Could not load user search settings, using defaults');
+        }
       }
       
       const resultCount = userSearchSetting?.dataValues?.result_count || num_results;
@@ -175,10 +182,14 @@ async function handleGeneralSearch(type, query, num_results, userSearchSetting, 
     let searchProvider;
     
     // Get provider if user setting exists
-    if (userSearchSetting) {
-      searchProvider = await SearchProvider.findOne({ 
-        where: { id: userSearchSetting.provider_id }
-      });
+    if (userSearchSetting && SearchProvider) {
+      try {
+        searchProvider = await SearchProvider.findOne({ 
+          where: { id: userSearchSetting.provider_id }
+        });
+      } catch (err) {
+        console.warn('Could not load search provider:', err.message);
+      }
     }
     
     // Enhance query based on search type
@@ -205,32 +216,38 @@ async function handleGeneralSearch(type, query, num_results, userSearchSetting, 
     let content = '';
     
     // Use provider-specific search
-    if (searchProvider) {
-      switch (searchProvider.name) {
-        case 'Tavily':
-          const talivyResult = await TalivySearch.search(enhancedQuery, num_results);
-          json = talivyResult.json || [];
-          content = talivyResult.content || '';
-          break;
-          
-        case 'Cloudsway':
-          const cloudswayResult = await CloudswaySearch.search(enhancedQuery, num_results);
-          json = cloudswayResult.json || [];
-          content = cloudswayResult.content || '';
-          break;
-          
-        case 'Baidu':
-        case 'Bing':
-          const engine = searchProvider.name.toLowerCase();
-          const localResult = await LocalSearch.search(enhancedQuery, engine, num_results);
-          json = localResult.json || [];
-          content = localResult.content || '';
-          break;
-          
-        default:
-          // Fallback to basic search
-          content = `Search results for: ${enhancedQuery}\n(Provider ${searchProvider.name} not fully implemented)`;
-          json = [{ query: enhancedQuery, provider: searchProvider.name }];
+    if (searchProvider && TalivySearch && CloudswaySearch && LocalSearch) {
+      try {
+        switch (searchProvider.name) {
+          case 'Tavily':
+            const talivyResult = await TalivySearch.search(enhancedQuery, num_results);
+            json = talivyResult.json || [];
+            content = talivyResult.content || '';
+            break;
+            
+          case 'Cloudsway':
+            const cloudswayResult = await CloudswaySearch.search(enhancedQuery, num_results);
+            json = cloudswayResult.json || [];
+            content = cloudswayResult.content || '';
+            break;
+            
+          case 'Baidu':
+          case 'Bing':
+            const engine = searchProvider.name.toLowerCase();
+            const localResult = await LocalSearch.search(enhancedQuery, engine, num_results);
+            json = localResult.json || [];
+            content = localResult.content || '';
+            break;
+            
+          default:
+            // Fallback to basic search
+            content = `Search results for: ${enhancedQuery}\n(Provider ${searchProvider.name} not fully implemented)`;
+            json = [{ query: enhancedQuery, provider: searchProvider.name }];
+        }
+      } catch (err) {
+        console.warn('Search provider error:', err.message);
+        content = `Search results for: ${enhancedQuery}\n(Search provider error)`;
+        json = [{ query: enhancedQuery, error: err.message }];
       }
     } else {
       // No provider configured - return basic stub

@@ -9,6 +9,10 @@ const Expose = {
   params: {
     type: "object",
     properties: {
+      brief: {
+        description: "A one-sentence preamble describing the purpose of this operation",
+        type: "string"
+      },
       port: {
         description: "Local port number to expose",
         type: "integer"
@@ -23,7 +27,8 @@ const Expose = {
   memorized: false,
   
   async getActionDescription(args) {
-    const { port } = args;
+    const { port, brief } = args;
+    if (brief) return brief;
     return `Exposing port ${port}`;
   },
   
