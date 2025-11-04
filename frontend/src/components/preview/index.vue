@@ -61,16 +61,31 @@
           <!-- 文件展示 -->
           <FileContent
             v-else-if="
-              (type === 'write_code' || type === 'read_file') && fileName
+              (type === 'write_code' || type === 'read_file' || type === 'file') && fileName
             "
             :filePath="fileName"
             :file-content="fileContent"
           />
           <!-- 浏览器搜索结果-->
           <searchResults
-            v-else-if="type === 'web_search'"
+            v-else-if="type === 'web_search' || type === 'search'"
             :search-results="browserContent"
           />
+          <!-- Shell output -->
+          <Terminal
+            v-else-if="type === 'shell'"
+            :isPreview="true"
+            v-model:content="fileContent"
+          />
+          <!-- Match results -->
+          <searchResults
+            v-else-if="type === 'match'"
+            :search-results="browserContent"
+          />
+          <!-- Generic tool output -->
+          <div v-else-if="fileContent" class="generic-output">
+            <pre>{{ fileContent }}</pre>
+          </div>
         </div>
         <div class="time-content">
           <div class="btns">
@@ -165,6 +180,18 @@ const svgHash = {
   terminal_run: markRaw(Bash),
   read_file: markRaw(Edit),
   web_search: markRaw(Browser),
+  // New action types
+  plan: markRaw(Browser),
+  message: markRaw(Browser),
+  shell: markRaw(Bash),
+  file: markRaw(Edit),
+  match: markRaw(Browser),
+  search: markRaw(Browser),
+  schedule: markRaw(Bash),
+  expose: markRaw(Bash),
+  generate: markRaw(Edit),
+  slides: markRaw(Edit),
+  webdev_init_project: markRaw(Edit),
 };
 
 const type = ref("");
@@ -329,6 +356,88 @@ async function handleMessageUpdate(newValue) {
       fileName.value = t("lemon.preview.search");
       browserContent.value = newValue.meta.json || [];
       fileContent.value = "";
+      break;
+    // New action types
+    case "plan":
+      typeDescription.value = "Planning";
+      typeTitle.value = "Task Planning";
+      fileName.value = "Plan";
+      fileContent.value = JSON.stringify(newValue.meta.plan || newValue.meta.json, null, 2);
+      break;
+    case "message":
+      typeDescription.value = "Message";
+      typeTitle.value = `Message (${newValue.meta.message_type || 'info'})`;
+      fileName.value = "Message";
+      fileContent.value = newValue.content || "";
+      break;
+    case "shell":
+      typeDescription.value = "Shell";
+      typeTitle.value = "Shell Command";
+      fileName.value = `Shell ${newValue.meta.session_id || 'session'}`;
+      fileContent.value = newValue.content || "";
+      break;
+    case "file":
+      typeDescription.value = "File";
+      typeTitle.value = `File ${newValue.meta.file_action || 'operation'}`;
+      fileName.value = newValue.meta?.filepath
+        ? newValue.meta.filepath.split("/").pop() || ""
+        : "file";
+      if (newValue.meta?.filepath && newValue.meta.file_action !== 'write') {
+        try {
+          const res = await files.getFile(newValue.meta.filepath);
+          fileContent.value = typeof res === "string" ? res : JSON.stringify(res, null, 2);
+        } catch (error) {
+          fileContent.value = newValue.content || "";
+        }
+      } else {
+        fileContent.value = newValue.content || "";
+      }
+      break;
+    case "match":
+      typeDescription.value = "Pattern Match";
+      typeTitle.value = `Match (${newValue.meta.match_action || 'search'})`;
+      fileName.value = "Match Results";
+      browserContent.value = newValue.meta.results || newValue.meta.json || [];
+      fileContent.value = "";
+      break;
+    case "search":
+      typeDescription.value = "Search";
+      typeTitle.value = `Search (${newValue.meta.search_type || 'info'})`;
+      fileName.value = "Search Results";
+      browserContent.value = newValue.meta.json || [];
+      fileContent.value = "";
+      break;
+    case "schedule":
+      typeDescription.value = "Schedule";
+      typeTitle.value = "Task Scheduling";
+      fileName.value = "Schedule";
+      fileContent.value = JSON.stringify(newValue.meta.schedule || newValue.meta.json, null, 2);
+      break;
+    case "expose":
+      typeDescription.value = "Expose Port";
+      typeTitle.value = "Port Exposure";
+      fileName.value = "Exposed Service";
+      fileContent.value = `Port: ${newValue.meta.port}\nURL: ${newValue.meta.url}`;
+      break;
+    case "generate":
+      typeDescription.value = "Generate";
+      typeTitle.value = "Generation Mode";
+      fileName.value = "Generate";
+      fileContent.value = newValue.content || "";
+      break;
+    case "slides":
+      typeDescription.value = "Slides";
+      typeTitle.value = "Presentation";
+      fileName.value = newValue.meta?.filepath
+        ? newValue.meta.filepath.split("/").pop() || ""
+        : "presentation.html";
+      fileContent.value = `Slides: ${newValue.meta.slide_count || 'N/A'}\nPath: ${newValue.meta.filepath || 'N/A'}`;
+      break;
+    case "webdev_init_project":
+      typeDescription.value = "Project Init";
+      typeTitle.value = "Web Project";
+      fileName.value = newValue.meta?.project_name || "project";
+      fileContent.value = `Project: ${newValue.meta.project_name}\nFeatures: ${newValue.meta.features}\nPath: ${newValue.meta.project_dir}`;
       break;
     // case "browser":
     //   typeDescription.value = t('lemon.preview.search');
@@ -782,5 +891,24 @@ const handleTimeChange = (newTime) => {
 
 :deep(.xterm-selection div) {
   background-color: unset !important;
+}
+</style>
+
+<style lang="scss" scoped>
+.generic-output {
+  padding: 16px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  overflow: auto;
+  max-height: 600px;
+
+  pre {
+    margin: 0;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
 }
 </style>
