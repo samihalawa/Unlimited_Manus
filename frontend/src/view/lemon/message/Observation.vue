@@ -46,6 +46,18 @@ const actionTypeDescriptions = {
   web_search: t("lemon.message.searching"),
   read_file: t("lemon.message.readFile"),
   mcp_tool: "MCP",
+  // New tool action types
+  plan: "Planning",
+  message: "Message",
+  shell: "Shell",
+  file: "File Operation",
+  match: "Pattern Match",
+  search: "Search",
+  schedule: "Schedule Task",
+  expose: "Expose Port",
+  generate: "Generate",
+  slides: "Create Slides",
+  webdev_init_project: "Init Project",
 };
 const svgHash = {
   browse: Browse,
@@ -56,6 +68,18 @@ const svgHash = {
   web_search: Browse,
   browser: Browse,
   mcp_tool: Bash,
+  // New tool icons
+  plan: Think,
+  message: Browse,
+  shell: Bash,
+  file: Edit,
+  match: Browse,
+  search: Browse,
+  schedule: Tools,
+  expose: Tools,
+  generate: Tools,
+  slides: Edit,
+  webdev_init_project: Tools,
 };
 
 const command = computed(() => {

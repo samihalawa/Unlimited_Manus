@@ -7,6 +7,7 @@
       <template v-else-if="conversationId">
         <div class="chat-panel-content">
           <ChatHeader :title="currentChat?.title" @share="handleShare" />
+          <PhaseDisplay />
           <ChatMessages :messages="messages" :mode="mode" />
           <ChatInput @send="handleSendMessage" />
           <div class="scroll-to-bottom" @click="scrollToBottom" v-if="isShowScrollToBottom">
@@ -28,6 +29,7 @@ import { ref, computed, watchEffect, onMounted } from "vue";
 import ConversationList from "./ConversationList.vue";
 import ChatHeader from "./ChatHeader.vue";
 import ChatMessages from "./ChatMessages.vue";
+import PhaseDisplay from "@/components/plan/PhaseDisplay.vue";
 import Preview from "@/components/preview/index.vue";
 import LocalPreview from "@/components/preview/fullPreview.vue";
 import ChatInput from "./ChatInput.vue";

@@ -1,6 +1,7 @@
 import sse from '@/services/sse';
 import fileServices from '@/services/files';
 import { useChatStore } from '@/store/modules/chat';
+import { usePlanStore } from '@/store/modules/plan';
 import messageFun from './message';
 import userService from '@/services/auth'
 
@@ -10,6 +11,9 @@ const userStore = useUserStore();
 const { user, membership, points } = storeToRefs(userStore);
 import { v4 as uuid } from 'uuid';
 import i18n from '@/locals';
+
+// Initialize plan store
+const planStore = usePlanStore();
 
 
 async function getUserInfo() {
@@ -178,6 +182,47 @@ async function sendMessage(question, conversationId, files, mcp_server_ids = [],
 
 }
 
+/**
+ * Handle plan tool messages (plan.update and plan.advance)
+ */
+function handlePlanMessage(json, conversationId) {
+    if (!json.meta || !json.meta.plan) return;
+    
+    const planAction = json.meta.plan_action;
+    const planData = json.meta.plan;
+    
+    if (planAction === 'update') {
+        // Plan was created or updated
+        planStore.updatePlan(planData, conversationId);
+    } else if (planAction === 'advance') {
+        // Phase was advanced
+        if (planData.current_phase_id) {
+            const prevPhaseId = planData.current_phase_id - 1;
+            planStore.advancePhase(conversationId, prevPhaseId, planData.current_phase_id);
+        }
+    }
+}
+
+/**
+ * Handle message tool messages (info/ask/result types)
+ */
+function handleMessageToolMessage(json, conversationId) {
+    if (!json.meta) return;
+    
+    const messageType = json.meta.message_type;
+    
+    // For 'ask' type, we might need special handling to show a reply box
+    // For now, the message will be rendered normally in the chat
+    // Future: Implement blocking behavior and reply box for 'ask' type
+    
+    if (messageType === 'ask') {
+        // Mark this message as requiring user response
+        json.requires_response = true;
+    } else if (messageType === 'result') {
+        // This is the final result - might trigger some completion UI
+        json.is_final_result = true;
+    }
+}
 
 function update(ch, conversationId) {
     let json;
@@ -195,6 +240,17 @@ function update(ch, conversationId) {
     if (tempMessageIndex !== -1) {
         messages.splice(tempMessageIndex, 1);
     }
+    
+    // Handle plan tool messages
+    if (json.meta && json.meta.action_type === 'plan') {
+        handlePlanMessage(json, conversationId);
+    }
+    
+    // Handle message tool messages
+    if (json.meta && json.meta.action_type === 'message') {
+        handleMessageToolMessage(json, conversationId);
+    }
+    
     // messages.push(json);
     messageFun.handleMessage(json, messages);
 
