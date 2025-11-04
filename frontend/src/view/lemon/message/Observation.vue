@@ -100,14 +100,23 @@ const svgHash = {
   webdev_init_project: Tools,
 };
 
+const resolveActionKey = (actionType) => {
+  if (!actionType) return null;
+  if (actionTypeDescriptions[actionType]) return actionType;
+  const base = actionType.split('.')[0];
+  return actionTypeDescriptions[base] ? base : actionType;
+};
+
 const command = computed(() => {
   const actionType = props.action.meta.action_type;
-  return actionTypeDescriptions[actionType] || "";
+  const key = resolveActionKey(actionType);
+  return (key && actionTypeDescriptions[key]) || "";
 });
 
 const iconComponent = computed(() => {
   const actionType = props.action.meta.action_type;
-  return svgHash[actionType] || Tools; // 使用Tools作为默认的工具调用图标
+  const key = resolveActionKey(actionType);
+  return (key && svgHash[key]) || svgHash[actionType] || Tools;
 });
 
 const information = computed(() => {

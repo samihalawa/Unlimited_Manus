@@ -10,6 +10,13 @@ const { v4: uuidv4 } = require('uuid');
 // Store active shell sessions
 const sessions = new Map();
 
+const buildShellMeta = (action, extra = {}) => ({
+  action_type: `shell.${action}`,
+  tool: "shell",
+  shell_action: action,
+  ...extra,
+});
+
 const Shell = {
   name: "shell",
   description: "Interact with shell sessions in the sandbox environment. Actions: 'view' to view session content, 'exec' to execute commands, 'wait' to wait for process completion, 'send' to send input to active process, 'kill' to terminate process.",
@@ -77,11 +84,7 @@ const Shell = {
           content: sessionList.length > 0 
             ? `Active sessions:\n${sessionList.map(s => `- ${s.id}: ${s.command} (${s.running ? 'running' : 'idle'})`).join('\n')}`
             : 'No active sessions',
-          meta: {
-            action_type: 'shell',
-            shell_action: 'view',
-            sessions: sessionList
-          }
+          meta: buildShellMeta('view', { sessions: sessionList })
         };
         
       } else if (action === 'exec') {
@@ -90,7 +93,7 @@ const Shell = {
           return {
             status: 'failure',
             content: 'Command is required for exec action',
-            meta: { action_type: 'shell', shell_action: 'exec' }
+            meta: buildShellMeta('exec')
           };
         }
         
@@ -128,14 +131,12 @@ const Shell = {
               resolve({
                 status: code === 0 ? 'success' : 'failure',
                 content: stdout || stderr || `Command exited with code ${code}`,
-                meta: {
-                  action_type: 'shell',
-                  shell_action: 'exec',
+                meta: buildShellMeta('exec', {
                   session_id: sid,
                   exit_code: code,
                   stdout,
                   stderr
-                }
+                })
               });
             }
           });
@@ -147,7 +148,7 @@ const Shell = {
               resolve({
                 status: 'failure',
                 content: `Command failed: ${error.message}`,
-                meta: { action_type: 'shell', shell_action: 'exec', session_id: sid }
+                meta: buildShellMeta('exec', { session_id: sid })
               });
             }
           });
@@ -173,14 +174,12 @@ const Shell = {
               resolve({
                 status: 'success',
                 content: `Command still running after ${timeout}s. Use 'wait' or 'kill' to manage.\nOutput so far:\n${stdout}`,
-                meta: {
-                  action_type: 'shell',
-                  shell_action: 'exec',
+                meta: buildShellMeta('exec', {
                   session_id: sid,
                   timeout: true,
                   stdout,
                   stderr
-                }
+                })
               });
             }
           }, timeoutMs);
@@ -192,7 +191,7 @@ const Shell = {
           return {
             status: 'failure',
             content: 'session is required for wait action',
-            meta: { action_type: 'shell', shell_action: 'wait' }
+            meta: buildShellMeta('wait')
           };
         }
         
@@ -201,7 +200,7 @@ const Shell = {
           return {
             status: 'failure',
             content: `Session ${session} not found`,
-            meta: { action_type: 'shell', shell_action: 'wait' }
+            meta: buildShellMeta('wait')
           };
         }
         
@@ -216,13 +215,11 @@ const Shell = {
               resolve({
                 status: 'success',
                 content: sessionData.stdout || sessionData.stderr || 'Process completed',
-                meta: {
-                  action_type: 'shell',
-                  shell_action: 'wait',
+                meta: buildShellMeta('wait', {
                   session_id: session,
                   stdout: sessionData.stdout,
                   stderr: sessionData.stderr
-                }
+                })
               });
             }
           };
@@ -235,12 +232,10 @@ const Shell = {
               resolve({
                 status: 'success',
                 content: `Still running. Output so far:\n${sessionData.stdout}`,
-                meta: {
-                  action_type: 'shell',
-                  shell_action: 'wait',
+                meta: buildShellMeta('wait', {
                   session_id: session,
                   timeout: true
-                }
+                })
               });
             }
           }, timeout * 1000);
@@ -252,7 +247,7 @@ const Shell = {
           return {
             status: 'failure',
             content: 'session and input are required for send action',
-            meta: { action_type: 'shell', shell_action: 'send' }
+            meta: buildShellMeta('send')
           };
         }
         
@@ -261,7 +256,7 @@ const Shell = {
           return {
             status: 'failure',
             content: `Session ${session} not found or not active`,
-            meta: { action_type: 'shell', shell_action: 'send' }
+            meta: buildShellMeta('send')
           };
         }
         
@@ -271,11 +266,7 @@ const Shell = {
         return {
           status: 'success',
           content: `Sent input to session ${session}`,
-          meta: {
-            action_type: 'shell',
-            shell_action: 'send',
-            session_id: session
-          }
+          meta: buildShellMeta('send', { session_id: session })
         };
         
       } else if (action === 'kill') {
@@ -284,7 +275,7 @@ const Shell = {
           return {
             status: 'failure',
             content: 'session is required for kill action',
-            meta: { action_type: 'shell', shell_action: 'kill' }
+            meta: buildShellMeta('kill')
           };
         }
         
@@ -293,7 +284,7 @@ const Shell = {
           return {
             status: 'failure',
             content: `Session ${session} not found`,
-            meta: { action_type: 'shell', shell_action: 'kill' }
+            meta: buildShellMeta('kill')
           };
         }
         
@@ -305,18 +296,14 @@ const Shell = {
         return {
           status: 'success',
           content: `Session ${session} terminated`,
-          meta: {
-            action_type: 'shell',
-            shell_action: 'kill',
-            session_id: session
-          }
+          meta: buildShellMeta('kill', { session_id: session })
         };
         
       } else {
         return {
           status: 'failure',
           content: `Unknown action: ${action}`,
-          meta: { action_type: 'shell' }
+          meta: buildShellMeta(action || 'unknown')
         };
       }
     } catch (error) {
@@ -324,7 +311,7 @@ const Shell = {
       return {
         status: 'failure',
         content: `Shell operation failed: ${error.message}`,
-        meta: { action_type: 'shell' }
+        meta: buildShellMeta('error')
       };
     }
   }

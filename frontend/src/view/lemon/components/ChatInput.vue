@@ -350,8 +350,8 @@ const closeVisibilityModal = () => {
 };
 
 // 移动端选项选择处理
-const handleMobileModeSelect = (mode) => {
-  handleModeChange(mode);
+const handleMobileModeSelect = async (mode) => {
+  await handleModeChange(mode);
   closeModeModal();
 };
 
@@ -430,12 +430,39 @@ const closeModal = () => {
 };
 
 // 处理模式切换
-const handleModeChange = (mode) => {
+const handleModeChange = async (mode) => {
+  if (!workModeOptions.value.some((option) => option.value === mode)) {
+    return;
+  }
+
   workMode.value = mode;
   console.log("工作模式切换为:", mode);
-  // 保存到浏览器缓存
   localStorage.setItem("workMode", mode);
-  // 这里可以添加模式切换后的逻辑处理
+
+  const targetChatMode = mode === "chat" ? "chat" : "task";
+  if (localStorage.getItem("mode") !== targetChatMode) {
+    localStorage.setItem("mode", targetChatMode);
+  }
+
+  if (chatStore.mode !== targetChatMode) {
+    await chatStore.init(targetChatMode);
+    chatStore.conversationId = null;
+    chatStore.chat = {};
+    chatStore.clearMessages();
+
+    if (targetChatMode === "chat") {
+      router.push("/lemon/chat");
+    } else if (agent.value?.id) {
+      router.push(`/lemon/${agent.value.id}`);
+    } else {
+      router.push("/lemon");
+    }
+  }
+
+  // Agent mode requires an agent context; prompt selection if absent
+  if (mode === "agent" && !agent.value?.id) {
+    emitter.emit("toggleMobileMenu", true);
+  }
 };
 const handleVisibilityChange = (value) => {
   console.log("handleVisibilityChange", value);

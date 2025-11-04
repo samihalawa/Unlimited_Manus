@@ -3,6 +3,13 @@
  * Activates a special mode for content generation
  */
 
+const buildGenerateMeta = (extra = {}) => ({
+  action_type: 'generate.activate',
+  tool: 'generate',
+  mode: 'generation',
+  ...extra,
+});
+
 const Generate = {
   name: "generate",
   description: "Enter generation mode for specialized content generation. This activates a mode optimized for creating content, code, or other artifacts. Returns a mode activation event.",
@@ -37,18 +44,18 @@ const Generate = {
       return {
         status: 'success',
         content: `Generation mode activated`,
-        meta: {
-          action_type: 'generate',
-          mode: context.generation_mode,
+        meta: buildGenerateMeta({
+          active: true,
+          activated_at: context.generation_mode.activated_at,
           json: context.generation_mode
-        }
+        })
       };
     } catch (error) {
       console.error('Generate tool error:', error);
       return {
         status: 'failure',
         content: `Generation mode activation failed: ${error.message}`,
-        meta: { action_type: 'generate' }
+        meta: buildGenerateMeta({ error: true })
       };
     }
   }

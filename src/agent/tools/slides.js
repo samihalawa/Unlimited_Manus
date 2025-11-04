@@ -7,6 +7,12 @@ const fs = require('fs').promises;
 const path = require('path');
 const { marked } = require('marked');
 
+const buildSlidesMeta = (extra = {}) => ({
+  action_type: 'slides.create',
+  tool: 'slides',
+  ...extra,
+});
+
 const Slides = {
   name: "slides",
   description: "Create a presentation slide deck. Provide slide count and path to markdown file with slide content. Creates HTML presentation in conversation workspace.",
@@ -55,7 +61,7 @@ const Slides = {
         return {
           status: 'failure',
           content: `Could not read slide content file: ${slide_content_file_path}`,
-          meta: { action_type: 'slides' }
+          meta: buildSlidesMeta({ error: 'missing_source' })
         };
       }
       
@@ -66,7 +72,7 @@ const Slides = {
         return {
           status: 'failure',
           content: 'No slide content found. Separate slides with "---" or "___"',
-          meta: { action_type: 'slides' }
+          meta: buildSlidesMeta({ error: 'no_content' })
         };
       }
       
@@ -89,20 +95,19 @@ const Slides = {
       return {
         status: 'success',
         content: `Created presentation with ${slides.length} slides\nSaved to: ${outputPath}`,
-        meta: {
-          action_type: 'slides',
+        meta: buildSlidesMeta({
           filepath: outputPath,
           slide_count: slides.length,
           title,
           json: { path: outputPath, slides: slides.length }
-        }
+        })
       };
     } catch (error) {
       console.error('Slides tool error:', error);
       return {
         status: 'failure',
         content: `Slide creation failed: ${error.message}`,
-        meta: { action_type: 'slides' }
+        meta: buildSlidesMeta({ error: true })
       };
     }
   }

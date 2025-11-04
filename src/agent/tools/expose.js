@@ -3,6 +3,12 @@
  * Returns a temporary public URL for a local service
  */
 
+const buildExposeMeta = (extra = {}) => ({
+  action_type: 'expose.open',
+  tool: 'expose',
+  ...extra,
+});
+
 const Expose = {
   name: "expose",
   description: "Expose a local port to a public URL. Returns a temporary public URL that can be used to access the local service.",
@@ -41,7 +47,7 @@ const Expose = {
         return {
           status: 'failure',
           content: 'Port must be between 1 and 65535',
-          meta: { action_type: 'expose' }
+          meta: buildExposeMeta()
         };
       }
       
@@ -75,20 +81,20 @@ const Expose = {
       return {
         status: 'success',
         content: `${exposed ? 'Public URL' : 'Local URL'}: ${publicUrl}\nPort ${port} is ${exposed ? 'exposed' : 'available locally'}`,
-        meta: {
-          action_type: 'expose',
+        meta: buildExposeMeta({
+          operation: exposed ? 'exposed' : 'local',
           port,
           url: publicUrl,
           exposed,
           subdomain: subdomain || null
-        }
+        })
       };
     } catch (error) {
       console.error('Expose tool error:', error);
       return {
         status: 'failure',
         content: `Port exposure failed: ${error.message}`,
-        meta: { action_type: 'expose' }
+        meta: buildExposeMeta({ operation: 'error' })
       };
     }
   }

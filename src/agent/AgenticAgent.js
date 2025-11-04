@@ -108,10 +108,10 @@ class AgenticAgent {
       const uuid = uuidv4();
       await this._publishMessage({ 
         uuid,
-        action_type: 'message', 
+        action_type: 'message.info', 
         status: 'running', 
         content: 'Acknowledging request...',
-        meta: { action_type: 'message' }
+        meta: { action_type: 'message.info', tool: 'message' }
       });
       
       const result = await messageTool.execute({
@@ -121,7 +121,7 @@ class AgenticAgent {
       
       await this._publishMessage({ 
         uuid,
-        action_type: 'message', 
+        action_type: result.meta?.action_type || 'message.info', 
         status: result.status, 
         content: result.content,
         meta: result.meta
@@ -179,10 +179,10 @@ class AgenticAgent {
     if (messageTool) {
       await this._publishMessage({ 
         uuid,
-        action_type: 'message', 
+        action_type: 'message.result', 
         status: 'running', 
         content: 'Preparing results...',
-        meta: { action_type: 'message' }
+        meta: { action_type: 'message.result', tool: 'message' }
       });
       
       // Prepare attachments (file paths)
@@ -194,12 +194,17 @@ class AgenticAgent {
         attachments: attachments
       }, uuid, this.context);
       
+      const finalMeta = {
+        ...result.meta,
+        files: newFiles
+      };
+
       await this._publishMessage({ 
         uuid,
-        action_type: 'message', 
+        action_type: result.meta?.action_type || 'message.result', 
         status: result.status, 
         content: result.content,
-        meta: { ...result.meta, json: newFiles }
+        meta: finalMeta
       });
     } else {
       // Fallback to old method
@@ -304,10 +309,10 @@ class AgenticAgent {
         
         await this._publishMessage({ 
           uuid,
-          action_type: 'plan', 
+          action_type: 'plan.update', 
           status: 'running', 
           content: 'Creating plan...',
-          meta: { action_type: 'plan' }
+          meta: { action_type: 'plan.update', tool: 'plan' }
         });
         
         const result = await planTool.execute({
@@ -319,14 +324,14 @@ class AgenticAgent {
         
         await this._publishMessage({ 
           uuid,
-          action_type: 'plan', 
+          action_type: result.meta?.action_type || 'plan.update', 
           status: result.status, 
           content: result.content,
           meta: result.meta
         });
       } else {
         // Fallback to old method
-        await this._publishMessage({ action_type: 'plan', status: 'success', content: '', json: tasks });
+        await this._publishMessage({ action_type: 'plan.update', status: 'success', content: '', json: tasks, meta: { action_type: 'plan.update', tool: 'plan', json: tasks } });
       }
 
       console.log('====== planning completed ======');

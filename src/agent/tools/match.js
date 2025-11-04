@@ -8,6 +8,13 @@ const fs = require('fs').promises;
 const path = require('path');
 const { existsSync } = require('fs');
 
+const buildMatchMeta = (action, extra = {}) => ({
+  action_type: `match.${action}`,
+  tool: "match",
+  match_action: action,
+  ...extra,
+});
+
 const Match = {
   name: "match",
   description: "Find files or text in the sandbox file system using pattern matching. Actions: 'glob' to match file paths/names, 'grep' to search contents with regex.",
@@ -68,7 +75,7 @@ const Match = {
           return {
             status: 'failure',
             content: 'scope is required for glob action',
-            meta: { action_type: 'match', match_action: 'glob' }
+            meta: buildMatchMeta('glob')
           };
         }
         
@@ -85,25 +92,21 @@ const Match = {
           return {
             status: 'success',
             content: `No files found matching: ${scope}`,
-            meta: {
-              action_type: 'match',
-              match_action: 'glob',
+            meta: buildMatchMeta('glob', {
               pattern: scope,
               results: []
-            }
+            })
           };
         }
         
         return {
           status: 'success',
           content: `Found ${matches.length} file(s):\n${matches.slice(0, 50).join('\n')}${matches.length > 50 ? `\n... and ${matches.length - 50} more` : ''}`,
-          meta: {
-            action_type: 'match',
-            match_action: 'glob',
+          meta: buildMatchMeta('glob', {
             pattern: scope,
             results: matches,
             count: matches.length
-          }
+          })
         };
         
       } else if (action === 'grep') {
@@ -112,7 +115,7 @@ const Match = {
           return {
             status: 'failure',
             content: 'scope and regex are required for grep action',
-            meta: { action_type: 'match', match_action: 'grep' }
+            meta: buildMatchMeta('grep')
           };
         }
         
@@ -127,13 +130,11 @@ const Match = {
           return {
             status: 'success',
             content: `No files found matching scope: ${scope}`,
-            meta: {
-              action_type: 'match',
-              match_action: 'grep',
+            meta: buildMatchMeta('grep', {
               regex,
               scope,
               results: []
-            }
+            })
           };
         }
         
@@ -145,7 +146,7 @@ const Match = {
           return {
             status: 'failure',
             content: `Invalid regex pattern: ${regex}`,
-            meta: { action_type: 'match', match_action: 'grep' }
+            meta: buildMatchMeta('grep')
           };
         }
         
@@ -201,13 +202,11 @@ const Match = {
           return {
             status: 'success',
             content: `No matches found for pattern: ${regex}`,
-            meta: {
-              action_type: 'match',
-              match_action: 'grep',
+            meta: buildMatchMeta('grep', {
               regex,
               scope,
               results: []
-            }
+            })
           };
         }
         
@@ -230,22 +229,20 @@ const Match = {
         return {
           status: 'success',
           content: output,
-          meta: {
-            action_type: 'match',
-            match_action: 'grep',
+          meta: buildMatchMeta('grep', {
             regex,
             scope,
             results,
             total_files: results.length,
             total_matches: results.reduce((sum, r) => sum + r.matches.length, 0)
-          }
+          })
         };
         
       } else {
         return {
           status: 'failure',
           content: `Unknown action: ${action}`,
-          meta: { action_type: 'match' }
+          meta: buildMatchMeta(action || 'unknown')
         };
       }
     } catch (error) {
@@ -253,7 +250,7 @@ const Match = {
       return {
         status: 'failure',
         content: `Match operation failed: ${error.message}`,
-        meta: { action_type: 'match', match_action: action }
+        meta: buildMatchMeta(action || 'error')
       };
     }
   }

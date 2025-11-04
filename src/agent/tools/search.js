@@ -21,6 +21,13 @@ try {
   console.warn('Search tool: Could not load search dependencies:', err.message);
 }
 
+const buildSearchMeta = (type, extra = {}) => ({
+  action_type: `search.${type}`,
+  tool: "search",
+  search_type: type,
+  ...extra,
+});
+
 const Search = {
   name: "search",
   description: "Search for information across various sources. Types: 'info' for general web information, 'image' for images (auto-downloaded), 'api' for APIs and documentation, 'news' for time-sensitive news, 'tool' for external tools/services, 'data' for datasets, 'research' for academic publications.",
@@ -68,7 +75,7 @@ const Search = {
       return {
         status: 'failure',
         content: 'queries array is required and must contain at least one query',
-        meta: { action_type: 'search', search_type: type }
+        meta: buildSearchMeta(type || 'unknown')
       };
     }
     
@@ -101,7 +108,7 @@ const Search = {
         return {
           status: 'failure',
           content: `Unknown search type: ${type}`,
-          meta: { action_type: 'search', search_type: type }
+          meta: buildSearchMeta(type || 'unknown')
         };
       }
     } catch (error) {
@@ -109,7 +116,7 @@ const Search = {
       return {
         status: 'failure',
         content: `Search failed: ${error.message}`,
-        meta: { action_type: 'search', search_type: type }
+        meta: buildSearchMeta(type || 'error')
       };
     }
   }
@@ -155,21 +162,19 @@ async function handleImageSearch(query, num_results, context) {
     return {
       status: 'success',
       content: `Found ${images.length} images for: ${query}\n${images.map((img, i) => `${i + 1}. ${img.title}`).join('\n')}`,
-      meta: {
-        action_type: 'search',
-        search_type: 'image',
+      meta: buildSearchMeta('image', {
         query,
         images,
         downloaded_paths: downloadedPaths,
         json: images
-      }
+      })
     };
   } catch (error) {
     console.error('Image search error:', error);
     return {
       status: 'failure',
       content: `Image search failed: ${error.message}`,
-      meta: { action_type: 'search', search_type: 'image' }
+      meta: buildSearchMeta('image')
     };
   }
 }
@@ -258,21 +263,19 @@ async function handleGeneralSearch(type, query, num_results, userSearchSetting, 
     return {
       status: 'success',
       content: content || `Search completed for: ${enhancedQuery}`,
-      meta: {
-        action_type: 'search',
-        search_type: type,
+      meta: buildSearchMeta(type, {
         query,
         enhanced_query: enhancedQuery,
         json,
         result_count: Array.isArray(json) ? json.length : 0
-      }
+      })
     };
   } catch (error) {
     console.error('General search error:', error);
     return {
       status: 'failure',
       content: `Search failed: ${error.message}`,
-      meta: { action_type: 'search', search_type: type }
+      meta: buildSearchMeta(type || 'error')
     };
   }
 }

@@ -4,6 +4,13 @@
  * Note: This is a create-only tool. Execution engine needs to be set up separately.
  */
 
+const buildScheduleMeta = (scheduleType, extra = {}) => ({
+  action_type: `schedule.${scheduleType}`,
+  tool: 'schedule',
+  schedule_type: scheduleType,
+  ...extra,
+});
+
 const Schedule = {
   name: "schedule",
   description: "Schedule tasks for recurring execution. Use 'cron' type with cron expression (e.g., '0 9 * * *' for daily at 9am) or 'interval' type with interval in minutes. Only creation is supported; execution engine to be implemented separately.",
@@ -63,7 +70,7 @@ const Schedule = {
           return {
             status: 'failure',
             content: 'cron expression is required for cron type',
-            meta: { action_type: 'schedule', schedule_type: 'cron' }
+            meta: buildScheduleMeta('cron')
           };
         }
         
@@ -73,7 +80,7 @@ const Schedule = {
           return {
             status: 'failure',
             content: 'Invalid cron expression. Expected format: "minute hour day month weekday"',
-            meta: { action_type: 'schedule', schedule_type: 'cron' }
+            meta: buildScheduleMeta('cron')
           };
         }
         
@@ -103,12 +110,10 @@ const Schedule = {
         return {
           status: 'success',
           content: `Scheduled cron task: ${name}\nExpression: ${cron}${repeat ? `\nRepeats: ${repeat} times` : '\nRepeats: indefinitely'}`,
-          meta: {
-            action_type: 'schedule',
-            schedule_type: 'cron',
+          meta: buildScheduleMeta('cron', {
             schedule: scheduleSpec,
             json: scheduleSpec
-          }
+          })
         };
         
       } else if (type === 'interval') {
@@ -116,7 +121,7 @@ const Schedule = {
           return {
             status: 'failure',
             content: 'interval (in minutes) is required for interval type',
-            meta: { action_type: 'schedule', schedule_type: 'interval' }
+            meta: buildScheduleMeta('interval')
           };
         }
         
@@ -124,7 +129,7 @@ const Schedule = {
           return {
             status: 'failure',
             content: 'interval must be at least 1 minute',
-            meta: { action_type: 'schedule', schedule_type: 'interval' }
+            meta: buildScheduleMeta('interval')
           };
         }
         
@@ -154,19 +159,17 @@ const Schedule = {
         return {
           status: 'success',
           content: `Scheduled interval task: ${name}\nInterval: every ${interval} minute(s)${repeat ? `\nRepeats: ${repeat} times` : '\nRepeats: indefinitely'}`,
-          meta: {
-            action_type: 'schedule',
-            schedule_type: 'interval',
+          meta: buildScheduleMeta('interval', {
             schedule: scheduleSpec,
             json: scheduleSpec
-          }
+          })
         };
         
       } else {
         return {
           status: 'failure',
           content: `Unknown schedule type: ${type}`,
-          meta: { action_type: 'schedule' }
+          meta: buildScheduleMeta(type || 'unknown')
         };
       }
     } catch (error) {
@@ -174,7 +177,7 @@ const Schedule = {
       return {
         status: 'failure',
         content: `Schedule creation failed: ${error.message}`,
-        meta: { action_type: 'schedule', schedule_type: type }
+        meta: buildScheduleMeta(type || 'error')
       };
     }
   }

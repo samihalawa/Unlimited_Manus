@@ -2,6 +2,8 @@ import { v4 as uuid } from 'uuid';
 import i18n from '@/locals';
 
 let messageStatus = "running";
+
+const isPlanActionType = (value) => typeof value === 'string' && value.startsWith('plan');
 // 处理消息
 function handleMessage(message, messages) {
     if (message.meta && typeof message.meta === 'string') {
@@ -16,13 +18,17 @@ function handleMessage(message, messages) {
         return messages.push(message);
     }
 
-    const { action_type } = message.meta;
-    console.log("handleMessage", message)
-    if (messageStatus == "stop" && action_type != "question" && action_type != "auto_reply") {
+    const rawActionType = message.meta?.action_type || "";
+    const [domain, subType] = rawActionType.split(".");
+    const primaryAction = subType ? domain : rawActionType;
+
+    console.log("handleMessage", message);
+
+    if (messageStatus === "stop" && primaryAction !== "question" && primaryAction !== "auto_reply") {
         return
     }
 
-    switch (action_type) {
+    switch (primaryAction) {
         case "chat":
             return handleChatMessage(message, messages);
         case "message":
@@ -49,6 +55,13 @@ function handleMessage(message, messages) {
             return updateTask(message, messages);
 
         default:
+            // Handle fully-qualified Manus-style action types (e.g. plan.update, message.result)
+            switch (domain) {
+                case "plan":
+                    return handlePlan(message, messages);
+                case "message":
+                    return handleChatMessage(message, messages);
+            }
             // 默认也执行更新任务
             return updateAction(message, messages);
     }
@@ -66,7 +79,7 @@ function handleStop(message, messages) {
         }
     }
     messages.forEach((message) => {
-        if (message.meta?.action_type === 'plan') {
+        if (isPlanActionType(message.meta?.action_type)) {
             // // 确保 meta.json 存在且是数组
             if (Array.isArray(message.meta.json)) {
                 // 遍历 meta.json
@@ -161,7 +174,7 @@ function updateTask(message, messages) {
     const task_id = message.meta.task_id;
     //根据 task_id 找到对应的任务
     //第一步 找到 plan_message 
-    let plan_message_index = messages.findLastIndex(messageInfo => messageInfo.meta && messageInfo.meta.action_type === 'plan');
+    let plan_message_index = messages.findLastIndex(messageInfo => messageInfo.meta && isPlanActionType(messageInfo.meta.action_type));
     //获取 plan 的 actions
     let plan = messages[plan_message_index];
 
@@ -204,7 +217,7 @@ function updateAction(message, messages) {
     }
 
     //第一步 找到 plan_message 
-    let plan_message_index = messages.findLastIndex(messageInfo => messageInfo.meta && messageInfo.meta.action_type === 'plan');
+    let plan_message_index = messages.findLastIndex(messageInfo => messageInfo.meta && isPlanActionType(messageInfo.meta.action_type));
     //获取 plan 的 actions
     let plan = messages[plan_message_index];
 

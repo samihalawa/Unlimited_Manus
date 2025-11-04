@@ -185,20 +185,47 @@ async function sendMessage(question, conversationId, files, mcp_server_ids = [],
 /**
  * Handle plan tool messages (plan.update and plan.advance)
  */
+function extractPlanData(meta) {
+    if (!meta) return null;
+    if (meta.plan) return meta.plan;
+    if (meta.json && typeof meta.json === 'object') return meta.json;
+    if (meta.goal && Array.isArray(meta.phases)) {
+        return {
+            goal: meta.goal,
+            phases: meta.phases,
+            current_phase_id: meta.current_phase_id,
+            createdAt: meta.created_at,
+            updatedAt: meta.updated_at
+        };
+    }
+    return null;
+}
+
 function handlePlanMessage(json, conversationId) {
-    if (!json.meta || !json.meta.plan) return;
-    
-    const planAction = json.meta.plan_action;
-    const planData = json.meta.plan;
-    
+    const meta = json.meta || {};
+    const actionType = meta.action_type || '';
+    if (!actionType.startsWith('plan')) return;
+
+    const [, planAction = ''] = actionType.split('.');
+    const planData = extractPlanData(meta);
+
+    if (!planData) {
+        return;
+    }
+
     if (planAction === 'update') {
-        // Plan was created or updated
         planStore.updatePlan(planData, conversationId);
-    } else if (planAction === 'advance') {
-        // Phase was advanced
-        if (planData.current_phase_id) {
-            const prevPhaseId = planData.current_phase_id - 1;
-            planStore.advancePhase(conversationId, prevPhaseId, planData.current_phase_id);
+        return;
+    }
+
+    if (planAction === 'advance') {
+        planStore.updatePlan(planData, conversationId);
+
+        const previousPhaseId = meta.previous_phase_id ?? (typeof meta.advanced_phase_id === 'number' ? meta.advanced_phase_id - 1 : undefined);
+        const nextPhaseId = meta.advanced_phase_id ?? meta.current_phase_id ?? planData.current_phase_id;
+
+        if (typeof previousPhaseId === 'number' && typeof nextPhaseId === 'number') {
+            planStore.advancePhase(conversationId, previousPhaseId, nextPhaseId);
         }
     }
 }
@@ -208,9 +235,11 @@ function handlePlanMessage(json, conversationId) {
  */
 function handleMessageToolMessage(json, conversationId) {
     if (!json.meta) return;
-    
-    const messageType = json.meta.message_type;
-    
+
+    const rawType = json.meta.action_type || '';
+    const [, derivedType] = rawType.split('.');
+    const messageType = json.meta.message_type || derivedType || 'info';
+
     // For 'ask' type, we might need special handling to show a reply box
     // For now, the message will be rendered normally in the chat
     // Future: Implement blocking behavior and reply box for 'ask' type
@@ -242,12 +271,12 @@ function update(ch, conversationId) {
     }
     
     // Handle plan tool messages
-    if (json.meta && json.meta.action_type === 'plan') {
+    if (json.meta && typeof json.meta.action_type === 'string' && json.meta.action_type.startsWith('plan')) {
         handlePlanMessage(json, conversationId);
     }
     
     // Handle message tool messages
-    if (json.meta && json.meta.action_type === 'message') {
+    if (json.meta && typeof json.meta.action_type === 'string' && json.meta.action_type.startsWith('message')) {
         handleMessageToolMessage(json, conversationId);
     }
     

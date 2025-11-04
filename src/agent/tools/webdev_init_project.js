@@ -7,6 +7,12 @@ const fs = require('fs').promises;
 const path = require('path');
 const { existsSync } = require('fs');
 
+const buildWebInitMeta = (status, extra = {}) => ({
+  action_type: `webdev_init_project.${status}`,
+  tool: 'webdev_init_project',
+  ...extra,
+});
+
 const WebdevInitProject = {
   name: "webdev_init_project",
   description: "Initialize a web development project with scaffolding. Presets: 'web-static' for static HTML/CSS/JS site, 'web-db-user' for full-stack app with database, server, and authentication.",
@@ -58,7 +64,7 @@ const WebdevInitProject = {
         return {
           status: 'failure',
           content: `Project directory already exists: ${projectDir}`,
-          meta: { action_type: 'webdev_init_project' }
+          meta: buildWebInitMeta('exists', { project_dir: projectDir })
         };
       }
       
@@ -73,27 +79,26 @@ const WebdevInitProject = {
         return {
           status: 'failure',
           content: `Unknown features preset: ${features}`,
-          meta: { action_type: 'webdev_init_project' }
+          meta: buildWebInitMeta('error', { features })
         };
       }
       
       return {
         status: 'success',
         content: `Project initialized: ${project_name}\nLocation: ${projectDir}\nFeatures: ${features}`,
-        meta: {
-          action_type: 'webdev_init_project',
+        meta: buildWebInitMeta('created', {
           features,
           project_name,
           project_dir: projectDir,
           json: { name: project_name, path: projectDir, features }
-        }
+        })
       };
     } catch (error) {
       console.error('Webdev init project error:', error);
       return {
         status: 'failure',
         content: `Project initialization failed: ${error.message}`,
-        meta: { action_type: 'webdev_init_project' }
+        meta: buildWebInitMeta('error', { message: error.message })
       };
     }
   }

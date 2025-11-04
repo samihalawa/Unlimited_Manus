@@ -17,6 +17,13 @@ const BINARY_EXTENSIONS = new Set([
   '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx'
 ]);
 
+const buildFileMeta = (action, extra = {}) => ({
+  action_type: `file.${action}`,
+  tool: "file",
+  file_action: action,
+  ...extra,
+});
+
 const File = {
   name: "file",
   description: "Perform operations on files in the sandbox file system. Actions: 'view' for multimodal files (images, PDFs), 'read' for text files, 'write' to create/overwrite, 'append' to add content, 'edit' for targeted changes.",
@@ -96,7 +103,7 @@ const File = {
           return {
             status: 'failure',
             content: `File not found: ${filepath}`,
-            meta: { action_type: 'file', file_action: 'view' }
+            meta: buildFileMeta('view')
           };
         }
         
@@ -123,14 +130,12 @@ const File = {
         return {
           status: 'success',
           content,
-          meta: {
-            action_type: 'file',
-            file_action: 'view',
+          meta: buildFileMeta('view', {
             filepath: fullPath,
             mime,
             size: stats.size,
             extension: ext
-          }
+          })
         };
         
       } else if (action === 'read') {
@@ -142,7 +147,7 @@ const File = {
           return {
             status: 'failure',
             content: `Cannot read binary file: ${filepath}. Use 'view' action for binary files.`,
-            meta: { action_type: 'file', file_action: 'read' }
+            meta: buildFileMeta('read')
           };
         }
         
@@ -150,7 +155,7 @@ const File = {
           return {
             status: 'failure',
             content: `File not found: ${filepath}`,
-            meta: { action_type: 'file', file_action: 'read' }
+            meta: buildFileMeta('read')
           };
         }
         
@@ -167,12 +172,10 @@ const File = {
         return {
           status: 'success',
           content: fileContent,
-          meta: {
-            action_type: 'file',
-            file_action: 'read',
+          meta: buildFileMeta('read', {
             filepath: fullPath,
             lines: fileContent.split('\n').length
-          }
+          })
         };
         
       } else if (action === 'write') {
@@ -181,7 +184,7 @@ const File = {
           return {
             status: 'failure',
             content: 'text is required for write action',
-            meta: { action_type: 'file', file_action: 'write' }
+            meta: buildFileMeta('write')
           };
         }
         
@@ -194,12 +197,10 @@ const File = {
         return {
           status: 'success',
           content: `File written: ${filepath} (${text.length} characters)`,
-          meta: {
-            action_type: 'file',
-            file_action: 'write',
+          meta: buildFileMeta('write', {
             filepath: fullPath,
-            size: text.length
-          }
+            characters_written: text.length
+          })
         };
         
       } else if (action === 'append') {
@@ -208,7 +209,7 @@ const File = {
           return {
             status: 'failure',
             content: 'text is required for append action',
-            meta: { action_type: 'file', file_action: 'append' }
+            meta: buildFileMeta('append')
           };
         }
         
@@ -221,11 +222,10 @@ const File = {
         return {
           status: 'success',
           content: `Content appended to: ${filepath}`,
-          meta: {
-            action_type: 'file',
-            file_action: 'append',
-            filepath: fullPath
-          }
+          meta: buildFileMeta('append', {
+            filepath: fullPath,
+            characters_appended: text.length
+          })
         };
         
       } else if (action === 'edit') {
@@ -234,7 +234,7 @@ const File = {
           return {
             status: 'failure',
             content: 'edits array is required for edit action',
-            meta: { action_type: 'file', file_action: 'edit' }
+            meta: buildFileMeta('edit')
           };
         }
         
@@ -242,7 +242,7 @@ const File = {
           return {
             status: 'failure',
             content: `File not found: ${filepath}`,
-            meta: { action_type: 'file', file_action: 'edit' }
+            meta: buildFileMeta('edit')
           };
         }
         
@@ -274,19 +274,17 @@ const File = {
         return {
           status: 'success',
           content: `File edited: ${filepath} (${appliedEdits} edits applied)`,
-          meta: {
-            action_type: 'file',
-            file_action: 'edit',
+          meta: buildFileMeta('edit', {
             filepath: fullPath,
             edits_applied: appliedEdits
-          }
+          })
         };
         
       } else {
         return {
           status: 'failure',
           content: `Unknown action: ${action}`,
-          meta: { action_type: 'file' }
+          meta: buildFileMeta(action || 'unknown')
         };
       }
     } catch (error) {
@@ -294,7 +292,7 @@ const File = {
       return {
         status: 'failure',
         content: `File operation failed: ${error.message}`,
-        meta: { action_type: 'file', file_action: action }
+        meta: buildFileMeta(action || 'error')
       };
     }
   }

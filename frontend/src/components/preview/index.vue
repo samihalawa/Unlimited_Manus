@@ -256,8 +256,14 @@ async function handleMessageUpdate(newValue) {
   }
 
   const actionType = newValue.meta.action_type;
+  const baseAction = actionType.split(".")[0];
+  const actionKey =
+    svgHash[actionType] || actionTypeDescriptions[actionType]
+      ? actionType
+      : baseAction;
+
   type.value = actionType;
-  typeIcon.value = svgHash[actionType] || null;
+  typeIcon.value = svgHash[actionKey] || svgHash[actionType] || null;
   let result = newValue.content || "";
   const maxLength = 65;
   if (result && result.length > maxLength) {
@@ -269,7 +275,7 @@ async function handleMessageUpdate(newValue) {
     typeDetail.value = result;
   }
 
-  switch (actionType) {
+  switch (actionKey) {
     case "browser":
       typeDescription.value = t("lemon.preview.browser");
       typeTitle.value = t("lemon.preview.browsing");

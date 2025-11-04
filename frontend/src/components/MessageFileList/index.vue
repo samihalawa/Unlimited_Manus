@@ -55,10 +55,15 @@ const list = computed(() => {
   let files = JSON.parse(JSON.stringify(json));
   if (files && Array.isArray(files)) {
     for (const file of files) {
-      if (file.filepath) {
-        file.filename = file.filepath.split("/").pop(); // 从路径中取文件名
+      if (!file.filepath && file.path) {
+        file.filepath = file.path;
+      }
+
+      const sourcePath = file.filepath || file.path || "";
+      if (sourcePath) {
+        file.filename = sourcePath.split("/").pop();
       } else {
-        file.filename = file.name || ""; // 没有 name 的话就设为空字符串
+        file.filename = file.name || "";
       }
     }
     return files;
@@ -138,13 +143,20 @@ const displayedFiles = computed(() => {
 // 打开文件
 const handleOpenFile = (file) => {
   console.log("handleOpenFile", file, file.filepath);
-  if (fileUtil.imgType.includes(file.filepath.split(".").pop())) {
-    workspaceService.getFile(file.filepath).then((res) => {
+  const filePath = file.filepath || file.path || "";
+  if (!filePath) {
+    return;
+  }
+
+  const extension = filePath.split(".").pop();
+  const normalizedExt = extension ? extension.toLowerCase() : "";
+  if (normalizedExt && fileUtil.imgType.includes(normalizedExt)) {
+    workspaceService.getFile(filePath).then((res) => {
       imageUrl.value = URL.createObjectURL(res);
     });
     isModalVisible.value = true;
   } else {
-    emitter.emit("fullPreviewVisable", file);
+    emitter.emit("fullPreviewVisable", { ...file, filepath: filePath });
   }
 };
 

@@ -1,7 +1,7 @@
 <template>
   <!-- <div>{{ message }}</div> -->
   <div style="display: flex; align-items: center" v-if="message.role === 'assistant' && message.is_temp && !message.meta">{{ content }} <LoadingDots /></div>
-  <div v-else-if="message?.meta?.action_type === 'plan'">
+  <div v-else-if="isPlanMessage">
     <Markdown :content="content" />
     <Planing :planing="message?.meta?.json" />
   </div>
@@ -63,9 +63,16 @@ const props = defineProps({
   },
 });
 
+const normalizedActionType = computed(() => {
+  const type = props.message?.meta?.action_type || "";
+  return type.includes(".") ? type.split(".")[0] : type;
+});
+
+const isPlanMessage = computed(() => normalizedActionType.value === "plan");
+
 const showFiles = computed(() => {
   const actions = new Set(["finish_summery", "question", "progress", "chat", "message"]);
-  return actions.has(props.message?.meta?.action_type);
+  return actions.has(normalizedActionType.value);
 });
 
 const content = computed(() => {
@@ -87,7 +94,7 @@ const parseJsonSafely = (jsonString) => {
 
 // 检查是否应该显示文件列表 props.message?.meta?.action_type
 const shouldShowFileList = () => {
-  const actionType = props.message?.meta?.action_type;
+  const actionType = normalizedActionType.value;
   const isValidActionType = actionType === "finish_summery" || actionType === "question";
   console.log("isValidActionType", isValidActionType);
   if (!isValidActionType) {
