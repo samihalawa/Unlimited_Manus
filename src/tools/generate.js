@@ -20,7 +20,11 @@ const generateTool = {
     return {
       content: `Generation mode enabled. ${brief}`,
       meta: {
-        json: [{ mode: 'generate', brief: params.brief || '' }],
+        action_type: 'generate',
+        mode: 'generation',
+        active: true,
+        brief: params.brief || '',
+        json: [{ mode: 'generation', active: true, brief: params.brief || '' }],
       },
     };
   },

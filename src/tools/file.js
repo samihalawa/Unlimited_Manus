@@ -17,6 +17,16 @@ const MIME_MAP = {
   '.csv': 'text/csv',
 };
 
+const TEXTUAL_MIME_TYPES = new Set([
+  'text/plain',
+  'text/markdown',
+  'text/csv',
+  'application/json',
+  'application/xml',
+  'application/javascript',
+  'application/x-yaml',
+]);
+
 const resolveMimeType = (filepath) => {
   const extension = path.extname(filepath).toLowerCase();
   return MIME_MAP[extension] || 'application/octet-stream';
@@ -113,6 +123,10 @@ const fileTool = {
           required: ['find'],
         },
       },
+      brief: {
+        type: 'string',
+        description: 'Reason for performing this file operation.',
+      },
     },
     required: ['action', 'path'],
   },
@@ -139,22 +153,34 @@ const fileTool = {
 
     if (action === 'view') {
       const { mimeType, base64 } = await viewFileContent(resolvedPath);
-      const summary = `Viewed file ${targetPath} (${mimeType}). Content returned as base64.`;
+      const derivedText = mimeType.startsWith('text/') ? await readFileContent(resolvedPath, range) : undefined;
       return {
-        content: summary,
+        content: `Viewed file ${targetPath} (${mimeType}).`,
         meta: {
-          filepath: resolvedPath,
-          content: JSON.stringify({ mimeType, base64 }),
+          action_type: 'file.view',
+          path: resolvedPath,
+          mime: mimeType,
+          derived_text: derivedText,
+          base64,
+          json: [{ path: resolvedPath, mime: mimeType }],
         },
       };
     }
 
     if (action === 'read') {
+      const mimeType = resolveMimeType(resolvedPath);
+      const isTextual = mimeType.startsWith('text/') || TEXTUAL_MIME_TYPES.has(mimeType);
+      if (!isTextual) {
+        throw new Error(`file.read only supports text formats. Use file.view for ${mimeType}.`);
+      }
       const data = await readFileContent(resolvedPath, range);
       return {
         content: data,
         meta: {
+          action_type: 'file.read',
           filepath: resolvedPath,
+          path: resolvedPath,
+          mime: mimeType,
         },
       };
     }
@@ -168,7 +194,11 @@ const fileTool = {
       return {
         content: `Wrote ${text.length} characters to ${targetPath}.`,
         meta: {
+          action_type: 'file.write',
           filepath: resolvedPath,
+          path: resolvedPath,
+          chars_written: text.length,
+          json: [{ path: resolvedPath, chars_written: text.length }],
         },
       };
     }
@@ -182,7 +212,11 @@ const fileTool = {
       return {
         content: `Appended ${text.length} characters to ${targetPath}.`,
         meta: {
+          action_type: 'file.append',
           filepath: resolvedPath,
+          path: resolvedPath,
+          chars_appended: text.length,
+          json: [{ path: resolvedPath, chars_appended: text.length }],
         },
       };
     }
@@ -197,7 +231,11 @@ const fileTool = {
       return {
         content: `Applied ${edits.length} edit(s) to ${targetPath}.`,
         meta: {
+          action_type: 'file.edit',
           filepath: resolvedPath,
+          path: resolvedPath,
+          edit_summary: edits.map(edit => ({ find: edit.find, replace: edit.replace ?? '', all: !!edit.all })),
+          json: [{ path: resolvedPath, edits: edits.length }],
         },
       };
     }

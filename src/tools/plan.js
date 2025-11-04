@@ -52,6 +52,10 @@ const planTool = {
         type: 'integer',
         description: 'ID of the phase to advance to when action is advance.',
       },
+      brief: {
+        type: 'string',
+        description: 'Optional note explaining why the plan is being modified.',
+      },
     },
     required: ['action'],
   },
@@ -86,6 +90,11 @@ const planTool = {
       return {
         content: contentLines.join('\n'),
         meta: {
+          action_type: 'plan.update',
+          goal: plan.goal,
+          phases: plan.phases,
+          current_phase_id: plan.current_phase_id,
+          next_phase_id: plan.phases.find(phase => phase.status === 'pending')?.id ?? null,
           json: phasesForDisplay,
           content: JSON.stringify(plan),
         },
@@ -107,6 +116,12 @@ const planTool = {
       return {
         content: contentLines.join(' '),
         meta: {
+          action_type: 'plan.advance',
+          goal: plan.goal,
+          phases: plan.phases,
+          current_phase_id,
+          next_phase_id,
+          upcoming_phase_id: plan.phases.find(phase => phase.status === 'pending')?.id ?? null,
           json: phasesForDisplay,
           content: JSON.stringify(plan),
         },

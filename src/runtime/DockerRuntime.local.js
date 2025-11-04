@@ -286,17 +286,28 @@ class DockerRuntime {
     console.log('DockerRuntime.execute_action', result);
     await this.handle_memory(result, action, context.memory);
     // 回调处理
-    let meta_url = ''
-    let meta_json = []
-    let meta_file_path = ''
-    let meta_content = ''
-    if (result.meta) {
-      meta_url = result.meta.url || ''
-      meta_json = result.meta.json || []
-      meta_file_path = result.meta.filepath || ''
-      meta_content = result.meta.content || ''
-    }
-    const msg = Message.format({ status: result.status, memorized: result.memorized || '', content: result.content || '', action_type: type, task_id: task_id, uuid: uuid || '', url: meta_url, json: meta_json, filepath: meta_file_path, meta_content: meta_content });
+    const meta = result.meta || {};
+    const actionType = meta.action_type || type;
+    const metaPayload = { ...meta };
+    delete metaPayload.url;
+    delete metaPayload.json;
+    delete metaPayload.filepath;
+    delete metaPayload.content;
+    delete metaPayload.action_type;
+
+    const msg = Message.format({
+      status: result.status,
+      memorized: result.memorized || '',
+      content: result.content || '',
+      action_type: actionType,
+      task_id: task_id,
+      uuid: uuid || '',
+      url: meta.url || '',
+      json: meta.json || [],
+      filepath: meta.filepath || '',
+      meta_content: meta.content || '',
+      meta: metaPayload
+    });
     await this.callback(msg, context);
     await Message.saveToDB(msg, context.conversation_id);
     return result;

@@ -57,6 +57,10 @@ const exposeTool = {
       return {
         content: `Unable to expose port ${port}: localtunnel dependency is not installed. Install it with "pnpm add localtunnel" and restart the service.`,
         meta: {
+          action_type: 'expose',
+          port,
+          url: `http://localhost:${port}`,
+          exposed: false,
           json: [],
         },
       };
@@ -67,6 +71,10 @@ const exposeTool = {
       return {
         content: `Port ${port} is already exposed at ${existing.url}.`,
         meta: {
+          action_type: 'expose',
+          port,
+          url: existing.url,
+          exposed: true,
           json: [{ port, url: existing.url }],
         },
       };
@@ -84,6 +92,10 @@ const exposeTool = {
     return {
       content: `Port ${port} exposed at ${tunnel.url}`,
       meta: {
+        action_type: 'expose',
+        port,
+        url: tunnel.url,
+        exposed: true,
         json: [payload],
       },
     };

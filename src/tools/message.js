@@ -22,13 +22,29 @@ const messageTool = {
       attachments: {
         type: 'array',
         description: 'Attachment references to include with the message.',
-        items: { type: 'string' },
+        items: {
+          oneOf: [
+            { type: 'string' },
+            {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                path: { type: 'string' },
+                mime: { type: 'string' },
+              },
+            },
+          ],
+        },
       },
       suggested_action: {
         type: 'string',
         enum: ['none', 'confirm_browser_operation', 'take_over_browser', 'upgrade_to_unlock_feature'],
         description: 'Optional suggested follow-up action for ask-type messages.',
       },
+      brief: {
+        type: 'string',
+        description: 'Reason for sending this message.'
+      }
     },
     required: ['type', 'text'],
   },
@@ -48,22 +64,38 @@ const messageTool = {
       throw new Error('text must be a non-empty string.');
     }
     if (!Array.isArray(attachments)) {
-      throw new Error('attachments must be an array of strings when provided.');
+      throw new Error('attachments must be an array when provided.');
     }
     if (!allowedSuggestedActions.has(suggested_action)) {
       throw new Error(`Invalid suggested_action "${suggested_action}".`);
     }
 
     const attachmentList = attachments
-      .filter(item => typeof item === 'string' && item.trim().length > 0)
-      .map(item => ({
-        filepath: item,
-        name: path.basename(item),
-      }));
+      .map(item => {
+        if (typeof item === 'string') {
+          const trimmed = item.trim();
+          if (!trimmed) return null;
+          return {
+            name: path.basename(trimmed),
+            path: trimmed,
+            mime: undefined,
+          };
+        }
+        if (item && typeof item === 'object' && item.path) {
+          return {
+            name: item.name || path.basename(item.path),
+            path: item.path,
+            mime: item.mime,
+          };
+        }
+        return null;
+      })
+      .filter(Boolean);
 
     return {
       content: text,
       meta: {
+        action_type: `message.${type}`,
         json: attachmentList,
         content: JSON.stringify({
           type,
@@ -71,6 +103,8 @@ const messageTool = {
           suggested_action,
           message_uuid: uuid,
         }),
+        attachments: attachmentList,
+        suggested_action,
       },
     };
   },

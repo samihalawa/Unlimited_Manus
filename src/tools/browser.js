@@ -91,7 +91,15 @@ const browserTool = {
       return {
         content: summary,
         meta: {
+          action_type: 'browser.navigate',
           json: [payload],
+          url,
+          intent,
+          focus,
+          success: payload.success,
+          completed: payload.completed,
+          usage: payload.usage,
+          actions: payload.captured_actions,
           content: JSON.stringify(result ?? {}),
         },
       };

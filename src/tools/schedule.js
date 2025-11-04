@@ -87,6 +87,15 @@ const scheduleTool = {
     return {
       content: summary,
       meta: {
+        action_type: `schedule.${type}`,
+        id: entry.id,
+        name,
+        type,
+        cron: entry.cron,
+        interval: entry.interval,
+        repeat: entry.repeat,
+        prompt,
+        created_at: entry.created_at,
         json: schedules,
       },
     };

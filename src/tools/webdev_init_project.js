@@ -248,6 +248,11 @@ const webdevInitTool = {
 
     await scaffoldProject(targetRoot, project_title || project_name, description, features);
 
+    const generatedFiles = [...STATIC_FILES.map(file => file.relativePath)];
+    if (features === 'web-db-user') {
+      generatedFiles.push(...BACKEND_FILES.map(file => file.relativePath));
+    }
+
     const summary = [
       `Created project ${project_name} using ${features} preset.`,
       `Location: ${targetRoot}`,
@@ -257,12 +262,19 @@ const webdevInitTool = {
     return {
       content: summary,
       meta: {
+        action_type: 'webdev_init_project',
         json: [{
           project_name,
           project_title: project_title || project_name,
           features,
           path: targetRoot,
+          files: generatedFiles,
         }],
+        project_name,
+        project_title: project_title || project_name,
+        features,
+        path: targetRoot,
+        files: generatedFiles,
       },
     };
   },

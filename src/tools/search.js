@@ -85,9 +85,18 @@ const searchTool = {
       return `Query ${index + 1} "${entry.query}": ${label}`;
     });
 
+    const provider = results.find(entry => entry.data?.provider)?.data?.provider || 'default';
+    const images = results.flatMap(entry => entry.data?.images || []);
+
     return {
       content: [`Search type: ${type}`, ...summaryLines].join('\n'),
       meta: {
+        action_type: `search.${type}`,
+        provider,
+        queries,
+        time_filter: time,
+        results,
+        images,
         json: results,
       },
     };

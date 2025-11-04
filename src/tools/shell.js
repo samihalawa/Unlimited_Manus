@@ -252,58 +252,40 @@ const shellTool = {
     if (action === 'exec') {
       const { sessionId, entry } = await startCommand(params, uuid, context);
       const { stdoutSnippet, stderrSnippet } = summariseOutput(entry.stdout, entry.stderr);
-      const summary = [
-        `Command: ${entry.command}`,
-        `Exit code: ${entry.exit_code}`,
-        entry.timed_out ? 'Result: Timed out' : 'Result: Completed',
-      ].join('\n');
-      const detail = [
-        summary,
-        stdoutSnippet ? `\nstdout:\n${stdoutSnippet}` : '',
-        stderrSnippet ? `\nstderr:\n${stderrSnippet}` : '',
-      ].join('');
       return {
-        content: detail.trim(),
+        content: `Executed "${entry.command}" in session ${sessionId}; exit code ${entry.exit_code}${entry.timed_out ? ' (timed out)' : ''}.`,
         meta: {
-          json: [{
-            session: sessionId,
-            exit_code: entry.exit_code,
-            timed_out: entry.timed_out,
-            command: entry.command,
-          }],
+          action_type: 'shell.exec',
+          session: sessionId,
+          command: entry.command,
+          exit_code: entry.exit_code,
+          timed_out: entry.timed_out,
+          duration_ms: entry.duration_ms,
+          stdout: stdoutSnippet,
+          stderr: stderrSnippet,
+          json: [{ session: sessionId, command: entry.command, exit_code: entry.exit_code, timed_out: entry.timed_out }],
         },
       };
     }
 
     if (action === 'view') {
-      const session = getSession(params.session);
-      if (!session.history.length) {
+      const sessionSummaries = Array.from(sessions.values()).map((session) => {
+        const lastEntry = session.history[session.history.length - 1];
         return {
-          content: `Session ${session.id} is ${session.status} with no command history.`,
-          meta: { json: [{ session: session.id, status: session.status }] },
+          session: session.id,
+          status: session.status,
+          cwd: session.cwd,
+          last_command: lastEntry ? lastEntry.command : null,
+          exit_code: lastEntry ? lastEntry.exit_code : null,
+          duration_ms: lastEntry ? lastEntry.duration_ms : null,
         };
-      }
-      const lastEntry = session.history[session.history.length - 1];
-      const { stdoutSnippet, stderrSnippet } = summariseOutput(lastEntry.stdout, lastEntry.stderr);
-      const detail = [
-        `Session ${session.id} (${session.status}). Last command "${lastEntry.command}" exited with ${lastEntry.exit_code}.`,
-        stdoutSnippet ? `\nstdout:\n${stdoutSnippet}` : '',
-        stderrSnippet ? `\nstderr:\n${stderrSnippet}` : '',
-      ].join('');
+      });
       return {
-        content: detail.trim(),
+        content: `Viewing ${sessionSummaries.length} shell session(s).`,
         meta: {
-          json: [{
-            session: session.id,
-            history: session.history.map(item => ({
-              command: item.command,
-              exit_code: item.exit_code,
-              timed_out: item.timed_out,
-              start_time: item.start_time,
-              duration_ms: item.duration_ms,
-            })),
-            status: session.status,
-          }],
+          action_type: 'shell.view',
+          sessions: sessionSummaries,
+          json: sessionSummaries,
         },
       };
     }
@@ -314,24 +296,26 @@ const shellTool = {
       if (!result) {
         return {
           content: `Session ${session.id} is idle.`,
-          meta: { json: [{ session: session.id, status: session.status }] },
+          meta: {
+            action_type: 'shell.wait',
+            session: session.id,
+            status: 'idle',
+            json: [{ session: session.id, status: 'idle' }],
+          },
         };
       }
       const { stdoutSnippet, stderrSnippet } = summariseOutput(result.stdout, result.stderr);
-      const detail = [
-        `Session ${session.id} command "${result.command}" completed with ${result.exit_code}.`,
-        stdoutSnippet ? `\nstdout:\n${stdoutSnippet}` : '',
-        stderrSnippet ? `\nstderr:\n${stderrSnippet}` : '',
-      ].join('');
       return {
-        content: detail.trim(),
+        content: `Session ${session.id} command "${result.command}" completed with ${result.exit_code}.`,
         meta: {
-          json: [{
-            session: session.id,
-            exit_code: result.exit_code,
-            timed_out: result.timed_out,
-            command: result.command,
-          }],
+          action_type: 'shell.wait',
+          session: session.id,
+          command: result.command,
+          exit_code: result.exit_code,
+          timed_out: result.timed_out,
+          stdout: stdoutSnippet,
+          stderr: stderrSnippet,
+          json: [{ session: session.id, command: result.command, exit_code: result.exit_code, timed_out: result.timed_out }],
         },
       };
     }
@@ -344,7 +328,12 @@ const shellTool = {
       await sendInput(session, params.input);
       return {
         content: `Sent input to session ${session.id}.`,
-        meta: { json: [{ session: session.id, input: params.input }] },
+        meta: {
+          action_type: 'shell.send',
+          session: session.id,
+          input: params.input,
+          json: [{ session: session.id, input: params.input }],
+        },
       };
     }
 
@@ -353,7 +342,11 @@ const shellTool = {
       await killSession(session);
       return {
         content: `Terminated running command in session ${session.id}.`,
-        meta: { json: [{ session: session.id, status: 'terminated' }] },
+        meta: {
+          action_type: 'shell.kill',
+          session: session.id,
+          json: [{ session: session.id, status: 'terminated' }],
+        },
       };
     }
 

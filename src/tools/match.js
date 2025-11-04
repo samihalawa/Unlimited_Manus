@@ -181,8 +181,13 @@ const matchTool = {
         ? `Found ${matches.length} file(s) matching pattern.`
         : 'No files matched the provided pattern.';
       return {
-        content: `${summary}\n${matches.join('\n')}`.trim(),
-        meta: { json: matches },
+        content: `${summary}`,
+        meta: {
+          action_type: 'match.glob',
+          scope,
+          results: matches,
+          json: matches.map(match => ({ path: match })),
+        },
       };
     }
 
@@ -194,7 +199,15 @@ const matchTool = {
       if (!results.length) {
         return {
           content: 'No matches found for the provided pattern.',
-          meta: { json: [] },
+          meta: {
+            action_type: 'match.grep',
+            scope,
+            regex,
+            leading,
+            trailing,
+            results: [],
+            json: [],
+          },
         };
       }
       const contentLines = results.map(
@@ -202,7 +215,15 @@ const matchTool = {
       );
       return {
         content: contentLines.join('\n'),
-        meta: { json: results },
+        meta: {
+          action_type: 'match.grep',
+          scope,
+          regex,
+          leading,
+          trailing,
+          results,
+          json: results,
+        },
       };
     }
 

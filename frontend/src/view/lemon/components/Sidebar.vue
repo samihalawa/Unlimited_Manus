@@ -23,7 +23,7 @@
     </div>
 
     <div class="sidebar-content">
-      <button class="new-task-button">
+      <button class="new-task-button" @click="handleNewTask">
         <span class="plus-icon">+</span>
         <span class="button-text">新建任务</span>
         <span class="shortcut">⌘ K</span>
@@ -106,6 +106,13 @@ const setActiveChat = (chat) => {
   conversationId.value = chat.conversation_id;
   chatStore.clearMessages();
   router.push(`/lemon/${chat.conversation_id}`);
+};
+
+const handleNewTask = () => {
+  conversationId.value = null;
+  chatStore.chat = {};
+  chatStore.clearMessages();
+  router.push('/lemon');
 };
 </script>
 

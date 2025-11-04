@@ -62,12 +62,15 @@ const slidesTool = {
     return {
       content: summary,
       meta: {
+        action_type: 'slides',
         json: [{
           mode: 'slides',
           slide_count: slide_count || null,
           outline_path: slide_content_file_path || null,
         }],
         content: outlinePreview || '',
+        slide_count: slide_count || null,
+        outline_path: slide_content_file_path || null,
       },
     };
   },

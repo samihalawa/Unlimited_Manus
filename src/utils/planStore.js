@@ -42,8 +42,8 @@ const writePlanFile = async (conversationId, data) => {
 };
 
 const normalisePhaseStatus = (status) => {
-  if (status === 'running' || status === 'in_progress') {
-    return 'running';
+  if (status === 'running' || status === 'in_progress' || status === 'active') {
+    return 'active';
   }
   if (status === 'completed' || status === 'success' || status === 'done') {
     return 'completed';
@@ -56,11 +56,11 @@ const initialisePhases = (phases = [], activePhaseId) => {
   return phases.map((phase, index) => {
     let status = 'pending';
     if (activeIndex === -1) {
-      status = index === 0 ? 'running' : 'pending';
+      status = index === 0 ? 'active' : 'pending';
     } else if (index < activeIndex) {
       status = 'completed';
     } else if (index === activeIndex) {
-      status = 'running';
+      status = 'active';
     }
     return {
       id: phase.id,
@@ -111,8 +111,8 @@ const updatePlan = async (conversationId, { goal, phases, current_phase_id }) =>
 
   const activePhaseId = current_phase_id ?? (normalisedPhases[0] && normalisedPhases[0].id);
   const phasesWithStatus = initialisePhases(normalisedPhases, activePhaseId);
-  const resolvedActiveId = phasesWithStatus.find(phase => phase.status === 'running')
-    ? phasesWithStatus.find(phase => phase.status === 'running').id
+  const resolvedActiveId = phasesWithStatus.find(phase => phase.status === 'active')
+    ? phasesWithStatus.find(phase => phase.status === 'active').id
     : (phasesWithStatus[0] ? phasesWithStatus[0].id : null);
 
   const plan = {
@@ -135,7 +135,7 @@ const advancePlan = async (conversationId, { current_phase_id, next_phase_id }) 
   const { currentIndex, nextIndex } = ensureSequentialAdvance(phases, current_phase_id, next_phase_id);
 
   phases[currentIndex].status = 'completed';
-  phases[nextIndex].status = 'running';
+  phases[nextIndex].status = 'active';
 
   const plan = {
     ...existing,
