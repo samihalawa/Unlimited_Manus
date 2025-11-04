@@ -1,9 +1,13 @@
 const fs = require('fs').promises;
 const path = require('path');
 const {write_code:util_write_code} = require('./utils/tools');
-const tools = require("@src/tools/index.js");
+const toolsOld = require("@src/tools/index.js");
+const agentTools = require("@src/agent/tools/index.js");
 const { v4: uuidv4 } = require("uuid");
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Merge old tools and new agent tools
+const tools = { ...toolsOld, ...agentTools };
 
 const Message = require('@src/utils/message');
 
@@ -32,9 +36,10 @@ class LocalRuntime {
 
   async handle_memory(result, action, memory) {
     const type = action.type;
-    const memorized_type = new Set(['read_file']);
+    // Tools that should be memorized by default
+    const memorized_type = new Set(['read_file', 'plan', 'search', 'file']);
     const { status, content, meta = {} } = result;
-    if (status === 'success') {
+    if (status === 'success' || status === 'asking') {
       console.log('LocalRuntime.handle_memory.memory logging user prompt');
       const memorized = memorized_type.has(type) || (result.memorized || false);
       await memory.addMessage('user', content, type, memorized, meta);
@@ -100,12 +105,13 @@ class LocalRuntime {
         if (tool) {
           console.log('LocalRuntime.execute_action.tool', tool.name, params);
           const execute = tool.execute;
-          const execute_result = await execute(params);
+          // Pass uuid and context to execute for new agent tools
+          const execute_result = await execute(params, uuid, context);
           // console.log('LocalRuntime.execute_action.tool.execute', execute_result);
-          const { content, meta = {} } = execute_result;
-          result = { uuid, status: 'success', content, memorized: tool.memorized || false, meta };
+          const { content, status = 'success', meta = {} } = execute_result;
+          result = { uuid, status, content, memorized: tool.memorized || false, meta };
         } else {
-          result = { status: 'failure', error: `Unknown action type: ${type}`, content: '', stderr: '' };
+          result = { uuid, status: 'failure', error: `Unknown action type: ${type}`, content: '', stderr: '' };
         }
     }
 
