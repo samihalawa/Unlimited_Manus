@@ -11,7 +11,26 @@ class TaskManager {
   constructor(logFilePath = 'task_log.md', conversation_id = null) {
     this.conversation_id = conversation_id;
     this.tasks = [];
+    this.plan = null; // Store current plan
     this.logFilePath = path.resolve(cache_dir, logFilePath);
+  }
+  
+  /**
+   * Update the current plan
+   * @param {Object} plan - Plan object with goal, phases, current_phase_id
+   */
+  async updatePlan(plan) {
+    this.plan = plan;
+    // TODO: Persist plan to database when needed
+    return plan;
+  }
+  
+  /**
+   * Get the current plan
+   * @returns {Object|null} Current plan or null
+   */
+  getPlan() {
+    return this.plan;
   }
 
   async bulkCreate(tasks) {

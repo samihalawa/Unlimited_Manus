@@ -55,6 +55,18 @@ const actionTypeDescriptions = {
   slides: "Slides mode",
   webdev_init_project: "Init project",
   mcp_tool: "MCP",
+  // New tool action types
+  plan: "Planning",
+  message: "Message",
+  shell: "Shell",
+  file: "File Operation",
+  match: "Pattern Match",
+  search: "Search",
+  schedule: "Schedule Task",
+  expose: "Expose Port",
+  generate: "Generate",
+  slides: "Create Slides",
+  webdev_init_project: "Init Project",
 };
 const svgHash = {
   browse: Browse,
@@ -74,6 +86,18 @@ const svgHash = {
   slides: Tools,
   webdev_init_project: Tools,
   mcp_tool: Bash,
+  // New tool icons
+  plan: Think,
+  message: Browse,
+  shell: Bash,
+  file: Edit,
+  match: Browse,
+  search: Browse,
+  schedule: Tools,
+  expose: Tools,
+  generate: Tools,
+  slides: Edit,
+  webdev_init_project: Tools,
 };
 
 const command = computed(() => {

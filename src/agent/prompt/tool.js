@@ -2,7 +2,11 @@
  * 工具调用提示模板生成器
  * 根据工具目录中的工具定义生成工具调用的提示模板
  */
-const tools = require("@src/tools/index");
+const toolsOld = require("@src/tools/index");
+const agentTools = require("@src/agent/tools/index");
+
+// Merge old tools and new agent tools
+const tools = { ...toolsOld, ...agentTools };
 
 /**
  * 生成工具列表的提示模板
@@ -40,10 +44,26 @@ ${toolDescription}
 </tool_list>
 
 <tool_call_guidelines>
-Follow these guidelines regarding tool calls
-- The conversation history, or tool_call history may refer to tools that are no longer available. NEVER call tools that are not explicitly provided.
-- Pay Attention: Assuming that the information obtained by mcp_tool is more accurate, please use mcp_tool first to obtain accurate information before generating and creating.
-- You MUST only use the tools explicitly provided in the tool list. Do not treat file names or code functions as tool names. The available tool names:
+Follow these guidelines regarding tool calls:
+
+GENERAL GUIDELINES:
+- You MUST only use the tools explicitly provided in the tool list. Do not treat file names or code functions as tool names.
+- The conversation history or tool_call history may refer to tools that are no longer available. NEVER call tools that are not explicitly provided.
+- Prioritize mcp_tool when available, then other tools. MCP tools provide more accurate information.
+
+TASK PLANNING (plan tool):
+- MUST use plan.update at the start of new tasks to create a structured plan with goal and phases.
+- Phase count scales with complexity: simple (2), typical (4-6), complex (10+).
+- MUST use plan.advance when current phase is complete and ready for next phase.
+- next_phase_id MUST be sequential (current_phase_id + 1). No skipping or going backward.
+
+USER COMMUNICATION (message tool):
+- MUST use message tool for ALL user-visible communication instead of direct responses.
+- Use info type for progress updates and acknowledgments.
+- Use ask type to request user input (blocks execution until response).
+- Use result type to deliver final results with attachments.
+
+Available tool names:
 - ${Object.keys(tools).join('\n  - ')}
 - finish
 </tool_call_guidelines>

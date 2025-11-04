@@ -100,7 +100,36 @@ class AgenticAgent {
     }
 
     const reply = await auto_reply(this.goal, this.context.conversation_id);
-    await this._publishMessage({ action_type: 'auto_reply', status: 'success', content: reply });
+    
+    // Use message tool for user communication
+    const agentTools = require('@src/agent/tools/index.js');
+    const messageTool = agentTools.message;
+    if (messageTool) {
+      const uuid = uuidv4();
+      await this._publishMessage({ 
+        uuid,
+        action_type: 'message', 
+        status: 'running', 
+        content: 'Acknowledging request...',
+        meta: { action_type: 'message' }
+      });
+      
+      const result = await messageTool.execute({
+        type: 'info',
+        text: reply
+      }, uuid, this.context);
+      
+      await this._publishMessage({ 
+        uuid,
+        action_type: 'message', 
+        status: result.status, 
+        content: result.content,
+        meta: result.meta
+      });
+    } else {
+      // Fallback to old method
+      await this._publishMessage({ action_type: 'auto_reply', status: 'success', content: reply });
+    }
   }
 
   // 执行规划阶段
@@ -143,7 +172,39 @@ class AgenticAgent {
 
     const summaryContent = await summary(this.goal, this.context.conversation_id, tasks, newFiles, this.context.staticUrl);
     const uuid = uuidv4();
-    await this._publishMessage({ uuid, action_type: 'finish_summery', status: 'success', content: summaryContent, json: newFiles });
+    
+    // Use message tool with type=result to deliver final output
+    const agentTools = require('@src/agent/tools/index.js');
+    const messageTool = agentTools.message;
+    if (messageTool) {
+      await this._publishMessage({ 
+        uuid,
+        action_type: 'message', 
+        status: 'running', 
+        content: 'Preparing results...',
+        meta: { action_type: 'message' }
+      });
+      
+      // Prepare attachments (file paths)
+      const attachments = newFiles.map(f => f.path || f.filepath || f.name).filter(Boolean);
+      
+      const result = await messageTool.execute({
+        type: 'result',
+        text: summaryContent,
+        attachments: attachments
+      }, uuid, this.context);
+      
+      await this._publishMessage({ 
+        uuid,
+        action_type: 'message', 
+        status: result.status, 
+        content: result.content,
+        meta: { ...result.meta, json: newFiles }
+      });
+    } else {
+      // Fallback to old method
+      await this._publishMessage({ uuid, action_type: 'finish_summery', status: 'success', content: summaryContent, json: newFiles });
+    }
 
     finalResult.summary = summaryContent;
     return finalResult;
@@ -226,7 +287,47 @@ class AgenticAgent {
 
       await this.taskManager.setTasks(plannedTasks);
       const tasks = this.taskManager.getTasks();
-      await this._publishMessage({ action_type: 'plan', status: 'success', content: '', json: tasks });
+      
+      // Use plan tool to create structured plan
+      const agentTools = require('@src/agent/tools/index.js');
+      const planTool = agentTools.plan;
+      if (planTool && tasks.length > 0) {
+        const uuid = uuidv4();
+        
+        // Convert tasks to phases
+        const phases = tasks.map((task, index) => ({
+          id: index + 1,
+          title: task.requirement || task.description || `Phase ${index + 1}`,
+          capabilities: {},
+          status: index === 0 ? 'active' : 'pending'
+        }));
+        
+        await this._publishMessage({ 
+          uuid,
+          action_type: 'plan', 
+          status: 'running', 
+          content: 'Creating plan...',
+          meta: { action_type: 'plan' }
+        });
+        
+        const result = await planTool.execute({
+          action: 'update',
+          goal: goal,
+          phases: phases,
+          current_phase_id: 1
+        }, uuid, this.context);
+        
+        await this._publishMessage({ 
+          uuid,
+          action_type: 'plan', 
+          status: result.status, 
+          content: result.content,
+          meta: result.meta
+        });
+      } else {
+        // Fallback to old method
+        await this._publishMessage({ action_type: 'plan', status: 'success', content: '', json: tasks });
+      }
 
       console.log('====== planning completed ======');
 
