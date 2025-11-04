@@ -47,7 +47,6 @@ const WebdevInitProject = {
   
   async execute(args, uuid, context) {
     const { features, project_name, project_title, description } = args;
-    const preset = features; // Use features as preset for internal logic
     
     try {
       // Determine project directory
@@ -66,27 +65,27 @@ const WebdevInitProject = {
       // Create project directory
       await fs.mkdir(projectDir, { recursive: true });
       
-      if (preset === 'web-static') {
+      if (features === 'web-static') {
         await initStaticProject(projectDir, project_name);
-      } else if (preset === 'web-db-user') {
+      } else if (features === 'web-db-user') {
         await initFullStackProject(projectDir, project_name);
       } else {
         return {
           status: 'failure',
-          content: `Unknown preset: ${preset}`,
+          content: `Unknown features preset: ${features}`,
           meta: { action_type: 'webdev_init_project' }
         };
       }
       
       return {
         status: 'success',
-        content: `Project initialized: ${project_name}\nLocation: ${projectDir}\nPreset: ${preset}`,
+        content: `Project initialized: ${project_name}\nLocation: ${projectDir}\nFeatures: ${features}`,
         meta: {
           action_type: 'webdev_init_project',
-          preset,
+          features,
           project_name,
           project_dir: projectDir,
-          json: { name: project_name, path: projectDir, preset }
+          json: { name: project_name, path: projectDir, features }
         }
       };
     } catch (error) {

@@ -130,7 +130,7 @@ const Match = {
             meta: {
               action_type: 'match',
               match_action: 'grep',
-              pattern,
+              regex,
               scope,
               results: []
             }
