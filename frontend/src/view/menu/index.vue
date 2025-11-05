@@ -142,9 +142,6 @@ const { agent, mode } = storeToRefs(chatStore)
 const { user, membership } = storeToRefs(userStore)
 const { isDark } = storeToRefs(themeStore)
 
-// define missing refs to avoid Vue warnings
-const isCollapsed = ref(false)
-const isStorePage = ref(false)
 
 const { t } = useI18n()
 import { driver } from "driver.js";

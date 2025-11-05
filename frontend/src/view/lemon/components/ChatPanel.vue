@@ -25,7 +25,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watchEffect, onMounted, onUnmounted } from "vue";
+import { ref, computed, watchEffect, onMounted } from "vue";
 import ConversationList from "./ConversationList.vue";
 import ChatHeader from "./ChatHeader.vue";
 import ChatMessages from "./ChatMessages.vue";
@@ -34,9 +34,8 @@ import Preview from "@/components/preview/index.vue";
 import LocalPreview from "@/components/preview/fullPreview.vue";
 import ChatInput from "./ChatInput.vue";
 import seeAgent from "@/services/see-agent";
-import emitter from "@/utils/emitter";
 import { useChatStore } from "@/store/modules/chat";
-
+import fullPreview from "@/components/preview/fullPreview.vue";
 import Down from "@/assets/svg/down.svg";
 import fileClass from "@/components/preview/fileClass.vue";
 const chatStore = useChatStore();
@@ -116,19 +115,6 @@ const scrollToBottom = () => {
   if (!chatMessages) return false;
   chatMessages.scrollTop = chatMessages.scrollHeight - chatMessages.clientHeight;
 };
-
-const isFullPreviewOpen = ref(false);
-onMounted(() => {
-  emitter.on("fullPreviewVisable", () => { isFullPreviewOpen.value = true; });
-  emitter.on("fullPreviewVisable-open", () => { isFullPreviewOpen.value = true; });
-  emitter.on("fullPreviewVisable-close", () => { isFullPreviewOpen.value = false; });
-});
-
-onUnmounted(() => {
-  emitter.off("fullPreviewVisable");
-  emitter.off("fullPreviewVisable-open");
-  emitter.off("fullPreviewVisable-close");
-});
 
 const viewEvents = () => {
   // 从 store 获取 events 数据
