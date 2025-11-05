@@ -698,7 +698,7 @@ const handleCancel = () => {
     left: 0px;
   }
 
-  .second-menu .collapsed{
+  .second-menu.collapsed{
     position: absolute;
     top: 0px;
     left: 0px;

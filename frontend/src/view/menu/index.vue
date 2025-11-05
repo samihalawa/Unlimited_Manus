@@ -103,9 +103,7 @@
 
   </div>
 
-  <div class="second-menu">
-    <secondMenu :chats="chatList" />
-  </div>
+  <secondMenu v-if="!isMobile" :chats="chatList" />
 
   <AgentsEdit v-model:visible="visible" id="" />
 </template>
@@ -142,6 +140,9 @@ const { agent, mode } = storeToRefs(chatStore)
 const { user, membership } = storeToRefs(userStore)
 const { isDark } = storeToRefs(themeStore)
 
+// define missing refs to avoid Vue warnings
+const isCollapsed = ref(false)
+const isStorePage = ref(false)
 
 const { t } = useI18n()
 import { driver } from "driver.js";
@@ -241,7 +242,8 @@ onUnmounted(() => {
 })
 
 const showMenu = computed(() => {
-  return !isMobile.value || isShowMenu.value
+  // Only show sidebar menu on mobile; avoid duplicate desktop sidebars
+  return isMobile.value && isShowMenu.value
 })
 
 function changeMode(modeType) {
