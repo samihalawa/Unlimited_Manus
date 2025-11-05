@@ -103,7 +103,9 @@
 
   </div>
 
-  <secondMenu v-if="!isMobile" :chats="chatList" />
+  <div class="second-menu">
+    <secondMenu :chats="chatList" />
+  </div>
 
   <AgentsEdit v-model:visible="visible" id="" />
 </template>
@@ -242,8 +244,7 @@ onUnmounted(() => {
 })
 
 const showMenu = computed(() => {
-  // Only show sidebar menu on mobile; avoid duplicate desktop sidebars
-  return isMobile.value && isShowMenu.value
+  return !isMobile.value || isShowMenu.value
 })
 
 function changeMode(modeType) {
