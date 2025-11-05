@@ -33,14 +33,12 @@ async function getUserInfo() {
 const chatStore = useChatStore();
 const { chatInfo, messages, mode, model_id, agent } = storeToRefs(chatStore)
 const fileConversationId = async (files, conversation_id) => {
-    //putFile
-    files.forEach(async (file) => {
-        await fileServices.putFile(file.id, conversation_id)
-    });
+    //putFile - use Promise.all to ensure all files complete before returning
+    await Promise.all(files.map(file => fileServices.putFile(file.id, conversation_id)));
 };
 
-const onOpenStream = (pending) => {
-    pending = true;
+const onOpenStream = () => {
+    // Callback when stream opens - can be used for UI updates
 };
 
 const throttledScrollToBottom = () => {
@@ -79,10 +77,10 @@ async function sendMessage(question, conversationId, files, mcp_server_ids = [],
     //     uri = `${baseURL}/api/agent/chat`;
     // }
     // Map task mode to agent mode (backend doesn't recognize "task")
-    const validatedMode = (workMode === 'task' || !['auto', 'agent', 'chat', 'twins'].includes(workMode)) 
-        ? 'agent' 
+    const validatedMode = (workMode === 'task' || !['auto', 'agent', 'chat', 'twins'].includes(workMode))
+        ? 'agent'
         : workMode;
-    
+
     let options = {
         question: question,
         conversation_id: conversationId,
@@ -173,13 +171,16 @@ async function sendMessage(question, conversationId, files, mcp_server_ids = [],
 
     const answer = '';
 
-    sse(uri, options, onTokenStream, onOpenStream(pending), answer, throttledScrollToBottom, abortController, conversationId).then((res) => {
+    sse(uri, options, onTokenStream, onOpenStream, answer, throttledScrollToBottom, abortController, conversationId).then((res) => {
         return res;
     }).catch((error) => {
         // Handle error
         return '';
     }).finally(() => {
-        chatStore.list.find((c) => c.conversation_id == conversationId).status = 'done';
+        const finalChat = chatStore.list.find((c) => c.conversation_id == conversationId);
+        if (finalChat) {
+            finalChat.status = 'done';
+        }
         if (localStorage.getItem('access_token')) {
             getUserInfo();
         }
@@ -289,7 +290,7 @@ function update(ch, conversationId) {
     messageFun.handleMessage(json, messages);
 
     if (json.meta && typeof json.meta === 'string') {
-        json.meta = JSON.parse(message.meta);
+        json.meta = JSON.parse(json.meta);
     }
     // setTimeout(() => {
     //     if (json.meta.action_type === 'finish_summery') {

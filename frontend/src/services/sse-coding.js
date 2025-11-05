@@ -40,14 +40,12 @@ async function getUserInfo() {
 
 // 处理files 的 conversation_id
 const fileConversationId = async (files, conversation_id) => {
-  // putFile
-  files.forEach(async (file) => {
-    await fileServices.putFile(file.id, conversation_id)
-  });
+  // putFile - use Promise.all to ensure all files complete before returning
+  await Promise.all(files.map(file => fileServices.putFile(file.id, conversation_id)));
 };
 
-const onOpenStream = (pending) => {
-  pending = true;
+const onOpenStream = () => {
+  // Callback when stream opens - can be used for UI updates
 };
 
 const throttledScrollToBottom = () => {
@@ -81,12 +79,12 @@ const sendMessage = async (question, conversationId, files, mcp_server_ids = [],
   chatStore.handleInitMessage(question, files, screenshot, filepath);
 
   let uri = `/api/agent/coding/sse`;
-  
+
   // Map task mode to agent mode (backend doesn't recognize "task")
-  const validatedMode = (workMode === 'task' || !['auto', 'agent', 'chat', 'twins'].includes(workMode)) 
-      ? 'agent' 
+  const validatedMode = (workMode === 'task' || !['auto', 'agent', 'chat', 'twins'].includes(workMode))
+      ? 'agent'
       : workMode;
-  
+
   let options = {
     requirement: question,
     selection: selection,
@@ -166,14 +164,17 @@ const sendMessage = async (question, conversationId, files, mcp_server_ids = [],
 
   const answer = '';
 
-  sse(uri, options, onTokenStream, onOpenStream(pending), answer, throttledScrollToBottom, abortController, conversationId).then((res) => {
+  sse(uri, options, onTokenStream, onOpenStream, answer, throttledScrollToBottom, abortController, conversationId).then((res) => {
     return res;
   }).catch((error) => {
     console.error(error);
     return '';
   }).finally(() => {
     emitter.emit("coding-message-sent", { conversationId });
-    chatStore.list.find((c) => c.conversation_id == conversationId).status = 'done';
+    const finalChat = chatStore.list.find((c) => c.conversation_id == conversationId);
+    if (finalChat) {
+      finalChat.status = 'done';
+    }
     getUserInfo();
   });
 }
