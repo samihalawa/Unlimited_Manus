@@ -3,6 +3,11 @@ import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router
 
 const routes = [
   {
+    path: "/landing",
+    name: "landing",
+    component: () => import(/* webpackChunkName: "landing" */ "@/view/landing/index.vue"),
+  },
+  {
     path: "/",
     component: () => import(/* webpackChunkName: "lemon" */ "@/view/lemon/index.vue"),
     meta: { verify: true },
