@@ -1,6 +1,6 @@
 <template>
   <div class="chat-layout">
-
+    <ConversationList />
 
     <div class="chat-panel">
       <AgentWelcome class="welcome" v-if="agentId && !conversationId" />
@@ -26,7 +26,7 @@
 
 <script setup>
 import { ref, computed, watchEffect, onMounted, onUnmounted } from "vue";
-
+import ConversationList from "./ConversationList.vue";
 import ChatHeader from "./ChatHeader.vue";
 import ChatMessages from "./ChatMessages.vue";
 import PhaseDisplay from "@/components/plan/PhaseDisplay.vue";
